@@ -96,7 +96,7 @@
         }
       }
     },
-    "/api/v1/patients/": {
+    "/api/v1/patient/create": {
       "post": {
         "description": "",
         "parameters": [
@@ -111,31 +111,25 @@
             "schema": {
               "type": "object",
               "properties": {
-                "patient_id": {
-                  "example": "any"
-                },
                 "firstName": {
                   "example": "any"
                 },
                 "lastName": {
                   "example": "any"
                 },
-                "dob": {
-                  "example": "any"
-                },
                 "gender": {
                   "example": "any"
                 },
-                "contact": {
+                "phone": {
                   "example": "any"
                 },
                 "address": {
                   "example": "any"
                 },
-                "primary_disease": {
+                "dob": {
                   "example": "any"
                 },
-                "location": {
+                "registrationDate": {
                   "example": "any"
                 }
               }
@@ -154,9 +148,14 @@
           },
           "409": {
             "description": "Conflict"
+          },
+          "500": {
+            "description": "Internal Server Error"
           }
         }
-      },
+      }
+    },
+    "/api/v1/patient/all": {
       "get": {
         "description": "",
         "parameters": [
@@ -199,7 +198,7 @@
         }
       }
     },
-    "/api/v1/patients/{id}": {
+    "/api/v1/patient/{id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -291,7 +290,7 @@
         }
       }
     },
-    "/api/v1/patients/{id}/images": {
+    "/api/v1/patient/{id}/images": {
       "post": {
         "description": "",
         "parameters": [
@@ -323,7 +322,7 @@
         }
       }
     },
-    "/api/v1/diseases/": {
+    "/api/v1/disease/": {
       "post": {
         "description": "",
         "parameters": [
@@ -361,7 +360,7 @@
         }
       }
     },
-    "/api/v1/diseases/{id}": {
+    "/api/v1/disease/{id}": {
       "get": {
         "description": "",
         "parameters": [
@@ -438,7 +437,7 @@
         }
       }
     },
-    "/api/v1/locations/": {
+    "/api/v1/location/": {
       "post": {
         "description": "",
         "parameters": [
@@ -476,7 +475,7 @@
         }
       }
     },
-    "/api/v1/locations/{id}": {
+    "/api/v1/location/{id}": {
       "get": {
         "description": "",
         "parameters": [
