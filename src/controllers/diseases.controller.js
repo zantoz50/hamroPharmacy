@@ -1,6 +1,6 @@
 "use strict";
 
-const Disease = require("../models/disease"); // adjust path as needed
+const Disease = require("../models/disease.model");
 const mongoose = require("mongoose");
 
 /**
@@ -64,7 +64,7 @@ async function getDiseases(req, res) {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.max(
       1,
-      Math.min(200, parseInt(req.query.limit, 10) || 20)
+      Math.min(200, parseInt(req.query.limit, 10) || 20),
     );
     const q = req.query.q ? String(req.query.q).trim() : null;
     const sort = req.query.sort ? String(req.query.sort) : "-createdAt";
@@ -163,7 +163,7 @@ async function updateDisease(req, res) {
     const updated = await Disease.findByIdAndUpdate(
       id,
       { $set: update },
-      opts
+      opts,
     ).exec();
     if (!updated) return res.status(404).json({ error: "Disease not found" });
     return res.json(updated);

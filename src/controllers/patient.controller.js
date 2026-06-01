@@ -3,7 +3,7 @@
 const { validationResult } = require("express-validator");
 const path = require("path");
 const fs = require("fs/promises");
-
+const { requireAuth } = require("../middleware/auth.middleware");
 const Patient = require("../models/patient.model");
 const Counter = require("../models/counter.model");
 const Disease = require("../models/disease.model");
@@ -22,8 +22,8 @@ async function getNextSequence(name) {
   const updated = await Counter.findOneAndUpdate(
     { id: name },
     { $inc: { seq: 1 } },
-    { new: true, upsert: true, setDefaultsOnInsert: true }
-  ).exec();
+    { new: true, upsert: true },
+  );
   return updated.seq;
 }
 
@@ -42,57 +42,62 @@ function parseDateToISO(value) {
 exports.createPatient = async (req, res) => {
   try {
     const body = req.body || {};
-    // If using a different key (e.g., req.auth, req.session.user), adjust accordingly
 
-    // minimal validation
-    if (
-      !body.firstName ||
-      typeof body.firstName !== "string" ||
-      !body.firstName.trim()
-    ) {
-      return res.status(400).json({ error: "firstName is required" });
-    }
-
-    // Prepare patient data
+    // 1. Structure the incoming frontend payload to match your exact PatientSchema fields
     const data = {
+      _id: new mongoose.Types.ObjectId(), // FORCE Mongoose to have a valid _id immediately
       firstName: String(body.firstName).trim(),
-      lastName: body.lastName ? String(body.lastName).trim() : undefined,
-      gender: body.gender ? String(body.gender).trim() : undefined,
-      phone: body.phone ? String(body.phone).trim() : undefined,
+      lastName: String(body.lastName).trim(),
+      gender: body.gender,
       address: body.address ? String(body.address).trim() : undefined,
+
+      // Maps your flat frontend phone/email keys into your sub-object schema
+      contact: {
+        phone: body.phone ? String(body.phone).trim() : undefined,
+        email: body.email ? String(body.email).trim() : undefined,
+      },
+
+      location: body.location,
+      primary_disease: body.primary_disease || body.diseases, // handles either name variation
+      medical_history: body.medicalHistory ? [body.medicalHistory] : [],
+      images: body.images || [],
     };
 
-    // Convert date fields to Date (ISO)
-    const dob = parseDateToISO(body.dob);
-    if (dob) data.dob = dob;
-    const reg = parseDateToISO(body.registrationDate);
-    if (reg) data.registrationDate = reg;
+    // 2. Safely parse incoming birth date field ("dateOfBirth" mapped to schema "dob")
+    try {
+      const incomingDate = body.dob || body.dateOfBirth;
+      if (incomingDate) {
+        const dob = parseDateToISO(incomingDate);
+        if (dob) data.dob = dob;
+      }
+    } catch (dateErr) {
+      console.error("Date parsing utility failed:", dateErr);
+      return res.status(400).json({ error: "Invalid date format provided" });
+    }
 
-    // get next patient_id
-    const nextId = await getNextSequence("patient_id");
-    data.patient_id = nextId;
-
+    // 3. DO NOT call getNextSequence here. Your schema's pre("validate") hook
+    // does this automatically behind the scenes using Counter collection.
     const patient = new Patient(data);
     const saved = await patient.save();
 
-    // Convert date fields in response to ISO strings
+    // 4. Send clean response back to client
     const out = saved.toObject({ getters: true });
+
     if (out.dob) out.dob = new Date(out.dob).toISOString();
-    if (out.registrationDate)
-      out.registrationDate = new Date(out.registrationDate).toISOString();
     if (out.createdAt) out.createdAt = new Date(out.createdAt).toISOString();
     if (out.updatedAt) out.updatedAt = new Date(out.updatedAt).toISOString();
 
     return res.status(201).json(out);
   } catch (err) {
-    console.error("createPatient error:", err);
+    console.error("createPatient error stack trace:", err);
+
     if (err.name === "ValidationError") {
       return res.status(400).json({ error: err.message });
     }
     if (err.name === "MongoServerError" && err.code === 11000) {
       return res
         .status(409)
-        .json({ error: "Duplicate patient_id or unique field conflict" });
+        .json({ error: "Duplicate id or unique field conflict" });
     }
     return res.status(500).json({ error: "Internal server error" });
   }
@@ -104,7 +109,7 @@ async function getPatients(req, res) {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.max(
       1,
-      Math.min(100, parseInt(req.query.limit, 10) || 20)
+      Math.min(100, parseInt(req.query.limit, 10) || 20),
     );
     const filter = {};
 
@@ -112,7 +117,7 @@ async function getPatients(req, res) {
     if (req.query.q) {
       const escaped = String(req.query.q).replace(
         /[.*+?^${}()|[\]\\]/g,
-        "\\$&"
+        "\\$&",
       );
       const re = new RegExp(escaped, "i");
       filter.$or = [
@@ -234,7 +239,7 @@ exports.deletePatient = async (req, res, next) => {
     const patient = await Patient.findById(req.params.id);
     if (!patient) return res.status(404).json({ message: "Patient not found" });
 
-    await Patient.deleteOne({ _id: patient._id });
+    await Patient.deleteOne({ _id: patient.id });
 
     // delete uploads folder for patient
     const dir = path.join(process.cwd(), "uploads", "patients", req.params.id);

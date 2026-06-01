@@ -6,9 +6,11 @@
   "scripts": {
     "start": "node src/index.js",
     "dev": "nodemon --watch src --exec node src/index.js",
+    "dev:debug": "nodemon --watch src --inspect-brk src/index.js",
     "test": "jest --runInBand",
     "lint": "eslint .",
     "seed-admin": "bash scripts/seed-admin.sh",
+    "swagger:generate": "node src/config/swagger.js",
     "debug": "node --inspect src/index.js"
   },
   "keywords": [

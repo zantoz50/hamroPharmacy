@@ -1,6 +1,6 @@
 "use strict";
 
-const Location = require("../models/location"); // adjust path as needed
+const Location = require("../models/location.model");
 const mongoose = require("mongoose");
 
 /**
@@ -66,7 +66,7 @@ async function getLocations(req, res) {
     const page = Math.max(1, parseInt(req.query.page, 10) || 1);
     const limit = Math.max(
       1,
-      Math.min(100, parseInt(req.query.limit, 10) || 20)
+      Math.min(100, parseInt(req.query.limit, 10) || 20),
     );
     const q = req.query.q ? String(req.query.q).trim() : null;
     const sort = req.query.sort ? String(req.query.sort) : "-createdAt";
@@ -162,7 +162,7 @@ async function updateLocation(req, res) {
     const updated = await Location.findByIdAndUpdate(
       id,
       { $set: update },
-      { new: true, runValidators: true }
+      { new: true, runValidators: true },
     ).exec();
     if (!updated) return res.status(404).json({ error: "Location not found" });
     return res.json(updated);

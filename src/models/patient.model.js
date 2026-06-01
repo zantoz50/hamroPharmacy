@@ -3,28 +3,22 @@
 const mongoose = require("mongoose");
 const Counter = require("./counter.model.js"); // <- ensure this path is correct relative to this file
 
-const MedicalHistorySchema = new mongoose.Schema(
-  {
-    source: { type: String },
-    extracted_text: { type: String },
-    date: { type: Date, default: Date.now },
-    image_path: { type: String },
-  },
-  { id: false }
-);
+const MedicalHistorySchema = new mongoose.Schema({
+  source: { type: String },
+  extracted_text: { type: String },
+  date: { type: Date, default: Date.now },
+  image_path: { type: String },
+});
 
-const ImageSchema = new mongoose.Schema(
-  {
-    filename: { type: String },
-    path: { type: String },
-    uploadedAt: { type: Date, default: Date.now },
-  },
-  { id: false }
-);
+const ImageSchema = new mongoose.Schema({
+  filename: { type: String },
+  path: { type: String },
+  uploadedAt: { type: Date, default: Date.now },
+});
 
 const PatientSchema = new mongoose.Schema(
   {
-    patient_id: { type: Number, unique: true, index: true }, // auto-incremented
+    id: { type: Number, unique: true, index: true }, // auto-incremented
     firstName: { type: String, required: true },
     lastName: { type: String, required: true },
     dob: { type: Date }, // date of birth
@@ -62,25 +56,34 @@ const PatientSchema = new mongoose.Schema(
     //   required: true,
     // },
   },
-  { timestamps: true }
+  { timestamps: true, _id: false },
 );
-// Pre-validate: assign auto-increment patient_id before validation runs
-PatientSchema.pre("validate", async function (next) {
+// Pre-validate: assign auto-increment id before validation runs
+PatientSchema.pre("save", async function (next) {
   try {
-    if (
-      this.isNew &&
-      (this.patient_id === undefined || this.patient_id === null)
-    ) {
+    if (this.isNew && (this.id === undefined || this.id === null)) {
       // Counter must be required correctly above
+      // const counter = await Counter.findOneAndUpdate(
+      //   { _id: "id" },
+      //   { $inc: { seq: 1 } },
+      //   { new: true, upsert: true, setDefaultsOnInsert: true },
+      // ).exec();
+      // if (!counter) {
+      //   return next(new Error("Unable to get counter for id"));
+      // }
+
       const counter = await Counter.findOneAndUpdate(
-        { id: "patient_id" },
+        { _id: "patients_sequence" }, // Identifies this specific sequence securely
         { $inc: { seq: 1 } },
-        { new: true, upsert: true, setDefaultsOnInsert: true }
+        { new: true, upsert: true, setDefaultsOnInsert: true },
       ).exec();
-      if (!counter) {
-        return next(new Error("Unable to get counter for patient_id"));
+
+      if (!counter || typeof counter.seq !== "number") {
+        return next(
+          new Error("Database sequence generation failed inside hook."),
+        );
       }
-      this.patient_id = counter.seq;
+      this.id = counter.seq;
     }
     next();
   } catch (err) {
@@ -96,7 +99,7 @@ PatientSchema.path("dob").validate(function (value) {
 
 PatientSchema.statics.search = async function search(
   filter = {},
-  { page = 1, limit = 20 } = {}
+  { page = 1, limit = 20 } = {},
 ) {
   const skip = (page - 1) * limit;
   const query = this.find(filter);

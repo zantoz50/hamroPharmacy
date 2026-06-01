@@ -1,82 +1,55 @@
 "use strict";
 
-const swaggerJsdoc = require("swagger-jsdoc");
 const swaggerAutogen = require("swagger-autogen")();
-
 const path = require("path");
 
-const options = {
-  definition: {
-    openapi: "3.0.3",
-    //   info: {
-    //     title: "HamroPharacy API",
-    //     version: "1.0.0",
-    //     description:
-    //       "API documentation for HamroPharacy - Patient management system with JWT Auth and OCR integration.",
-    //   },
-    //   servers: [
-    //     {
-    //       url: "http://localhost:3000/api/v1",
-    //       description: "Local Server",
-    //     },
-    //   ],
-    //   components: {
-    //     securitySchemes: {
-    //       BearerAuth: {
-    //         type: "http",
-    //         scheme: "bearer",
-    //         bearerFormat: "JWT",
-    //       },
-    //     },
-    //     tags: [
-    //       { name: "Auth", description: "Auth " },
-    //       { name: "Patient", description: "Patient Controllers" },
-    //     ],
-    //   },
-    //   security: [{ BearerAuth: [] }], // apply to all endpoints
+const outputFile = path.join(__dirname, "swagger-output.json");
+const endpointFiles = [
+  path.join(__dirname, "../app.js"),
+  path.join(__dirname, "../routes/**/*.js"),
+];
 
-    info: {
-      title: "HamroPharacy API",
-      description:
-        "API documentation for HamroPharacy - Patient Management System with JWT Authentication and OCR integration.",
-      version: "1.0.0",
-    },
-    servers: [
-      {
-        url: "http://localhost:3000/api/v1",
-        description: "Local Server",
-      },
-    ],
-    tags: [
-      { name: "Auth", description: "Authentication APIs" },
-      { name: "Patient", description: "Patient management APIs" },
-      { name: "Disease", description: "Disease management APIs" },
-      { name: "Location", description: "Doctor management APIs" },
-    ],
-    components: {
-      securitySchemes: {
-        BearerAuth: {
-          type: "http",
-          scheme: "bearer",
-          bearerFormat: "JWT",
-        },
-      },
-    },
-    security: [
-      {
-        BearerAuth: [],
-      },
-    ],
+const doc = {
+  swagger: "2.0",
+  info: {
+    title: "inventory API",
+    version: "1.0.0",
+    description: "API documentation for Inventory Management System",
   },
-  // 👇 Where Swagger will look for annotations
-
-  apis: [path.join(__dirname, "../routes/**/*.js")],
+  host: "localhost:3000",
+  basePath: "/api/v1",
+  schemes: ["http"],
+  tags: [
+    { name: "Authentication", description: "Authentication endpoints" },
+    { name: "Tenants", description: "Tenant management endpoints" },
+    { name: "Inventory", description: "Inventory management endpoints" },
+    { name: "RawMaterials", description: "Raw material management endpoints" },
+    { name: "Orders", description: "Order processing endpoints" },
+    // { name: "Patient", description: "Patient management endpoints" },
+    // { name: "Diseases", description: "Disease management endpoints" },
+    // { name: "Locations", description: "Location management endpoints" },
+  ],
+  securityDefinitions: {
+    bearerAuth: {
+      type: "apiKey",
+      name: "Authorization",
+      in: "header",
+      description:
+        "JWT authorization header using the Bearer scheme. Example: 'Bearer <token>'",
+    },
+  },
+  security: [{ bearerAuth: [] }],
 };
 
-const swaggerSpec = swaggerJsdoc(options);
+if (require.main === module) {
+  swaggerAutogen(outputFile, endpointFiles, doc)
+    .then(() => {
+      console.log(`Swagger generated at: ${outputFile}`);
+    })
+    .catch((err) => {
+      console.error("Failed to generate Swagger documentation:", err);
+      process.exit(1);
+    });
+}
 
-const outputFile = "./swagger-output.json";
-const routes = ["./src/app.js"]; // or your main route entry file
-swaggerAutogen(outputFile, routes, options);
-
-module.exports = swaggerSpec;
+module.exports = doc;
