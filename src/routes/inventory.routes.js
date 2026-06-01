@@ -4,6 +4,8 @@ const express = require("express");
 const { check } = require("express-validator");
 const controller = require("../controllers/inventory.controller");
 const validateRequest = require("../middleware/validateRequest.middleware");
+const { requireAuth } = require("../middleware/auth.middleware");
+const tenantMiddleware = require("../middleware/tenant.middleware");
 
 const router = express.Router();
 
@@ -18,6 +20,8 @@ router.get("/", controller.getInventory);
 
 router.post(
   "/",
+  requireAuth,
+  tenantMiddleware,
   [
     check("name").notEmpty().withMessage("Item name required"),
     check("sector")

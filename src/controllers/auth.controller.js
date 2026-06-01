@@ -30,6 +30,17 @@ exports.register = async (req, res, next) => {
         .json({ message: "Company name and subscription plan are required." });
     }
 
+    // Check if tenant exists
+    let tenant = await Tenant.findOne({ companyName: companyName.trim() });
+    if (!tenant) {
+      // Create new tenant
+      tenant = new Tenant({
+        companyName: companyName.trim(),
+        subscriptionPlan,
+      });
+      await tenant.save();
+    }
+
     const exists = await User.findOne({ email });
     if (exists) {
       return res.status(409).json({ message: "Email already in use" });
@@ -88,6 +99,59 @@ exports.register = async (req, res, next) => {
 };
 
 // --- LOGIN ---
+// exports.login = async (req, res, next) => {
+//   try {
+//     const errors = validationResult(req);
+//     if (!errors.isEmpty()) {
+//       return res.status(422).json({ errors: errors.array() });
+//     }
+
+//     const { email, username, password } = req.body;
+//     if (!password || (!email && !username)) {
+//       return res
+//         .status(400)
+//         .json({ message: "Email or username and password are required" });
+//     }
+
+//     // Find user by email OR username
+//     const user = await User.findOne({
+//       $or: [
+//         email ? { email: email.trim().toLowerCase() } : null,
+//         username ? { username: username.trim().toLowerCase() } : null,
+//       ].filter(Boolean),
+//     });
+
+//     if (!user) return res.status(401).json({ message: "Invalid credentials" });
+
+//     const match = await user.comparePassword(password);
+//     if (!match) return res.status(401).json({ message: "Invalid credentials" });
+
+//     const token = jwt.sign(
+//       { id: user._id.toString(), role: user.role, tenantId: user.tenantId },
+//       jwtConfig.secret,
+//       { expiresIn: jwtConfig.expiresIn },
+//     );
+
+//     res.json({
+//       user: {
+//         id: user._id,
+//         email: user.email,
+//         username: user.username,
+//         firstName: user.firstName,
+//         lastName: user.lastName,
+//         role: user.role,
+//         companyName: user.companyName,
+//         subscriptionPlan: user.subscriptionPlan,
+//         tenantId: user.tenantId,
+//       },
+//       token,
+//     });
+//   } catch (err) {
+//     logger.error("Login error", err);
+//     next(err);
+//   }
+// };
+
 exports.login = async (req, res, next) => {
   try {
     const errors = validationResult(req);
@@ -95,19 +159,20 @@ exports.login = async (req, res, next) => {
       return res.status(422).json({ errors: errors.array() });
     }
 
-    const { email, username, password } = req.body;
-    if (!password || (!email && !username)) {
+    // Treat "email" field as a generic identifier
+    const { email: identifier, password } = req.body;
+    if (!identifier || !password) {
       return res
         .status(400)
-        .json({ message: "Email or username and password are required" });
+        .json({ message: "Identifier and password are required" });
     }
 
-    // Find user by email OR username
+    // Try to find user by email OR username
     const user = await User.findOne({
       $or: [
-        email ? { email: email.trim().toLowerCase() } : null,
-        username ? { username: username.trim().toLowerCase() } : null,
-      ].filter(Boolean),
+        { email: identifier.trim().toLowerCase() },
+        { username: identifier.trim().toLowerCase() },
+      ],
     });
 
     if (!user) return res.status(401).json({ message: "Invalid credentials" });

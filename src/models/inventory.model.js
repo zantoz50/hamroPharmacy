@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const InventoryItemSchema = new mongoose.Schema(
   {
     tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: String,
       required: true,
       index: true,
     },
@@ -27,17 +27,22 @@ const InventoryItemSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    vendorCost: {
-      type: Number,
-      required: true,
-      min: 0,
-    },
     stock: {
       type: Number,
-      required: true,
+      required: false,
       min: 0,
     },
     skuIdentifier: {
+      type: String,
+      default: null,
+      trim: true,
+    },
+    discount: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    productImageUrl: {
       type: String,
       default: null,
       trim: true,

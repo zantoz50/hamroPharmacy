@@ -1,6 +1,6 @@
 "use strict";
 
-const InventoryItem = require("../models/inventory.model");
+const Inventory = require("../models/inventory.model");
 
 // Dashboard stats
 exports.getInventoryStats = async (req, res) => {

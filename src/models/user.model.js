@@ -81,7 +81,12 @@ const UserSchema = new mongoose.Schema(
 
     // Tenant-based fields
     companyName: { type: String, required: true }, // e.g. "Omni Consortium"
-    tenantId: { type: String, required: true, index: true }, // unique tenant identifier
+    // tenantId: { type: String, required: true, index: true }, // unique tenant identifier
+    tenantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
+      required: true,
+    },
 
     // New field for subscription plan
     subscriptionPlan: { type: String, required: true }, // e.g. "restaurant", "cafeteria", "mart", "all"
