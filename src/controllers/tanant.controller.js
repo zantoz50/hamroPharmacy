@@ -1,0 +1,72 @@
+"use strict";
+
+const User = require("../models/user.model");
+
+// GET all tenants (distinct tenantId values)
+exports.getTenants = async (req, res) => {
+  try {
+    const tenants = await User.distinct("tenantId");
+    res.json({ tenants });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// GET users by tenantId
+exports.getTenantUsers = async (req, res) => {
+  try {
+    const { tenantId } = req.params;
+    const users = await User.find({ tenantId });
+    res.json(users);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// CREATE a new tenant admin user
+exports.createTenantAdmin = async (req, res) => {
+  try {
+    const { email, username, password, companyName } = req.body;
+
+    if (!companyName) {
+      return res
+        .status(400)
+        .json({ error: "Company name (tenantId) is required" });
+    }
+
+    const tenantId = companyName.trim();
+
+    const exists = await User.findOne({ $or: [{ email }, { username }] });
+    if (exists) {
+      return res
+        .status(409)
+        .json({ error: "Email or username already in use" });
+    }
+
+    const admin = new User({
+      email,
+      username,
+      password,
+      role: "admin",
+      companyName,
+      tenantId,
+      firstName: "Admin",
+    });
+
+    await admin.save();
+
+    res.status(201).json({
+      success: true,
+      user: {
+        id: admin._id,
+        email: admin.email,
+        username: admin.username,
+        companyName: admin.companyName,
+        tenantId: admin.tenantId,
+        role: admin.role,
+      },
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
