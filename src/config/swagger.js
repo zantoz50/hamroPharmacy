@@ -39,6 +39,9 @@ const doc = {
     },
   },
   security: [{ bearerAuth: [] }],
+  host: process.env.SWAGGER_HOST || "localhost:3000",
+  basePath: "/api/v1",
+  schemes: [process.env.SWAGGER_SCHEME || "http"],
 };
 
 if (require.main === module) {

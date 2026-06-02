@@ -16,6 +16,7 @@ const errorHandler = require("./middleware/errorHandler");
 const requestLogger = require("./middleware/requestLogger");
 
 const app = express();
+app.set("trust proxy", true);
 
 // Security
 app.use(helmet());
@@ -41,15 +42,15 @@ app.use(
 );
 
 // ✅ Swagger Documentation
-// app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec)); //Old One
-app.use(
-  "/api-docs",
-  swaggerUi.serve,
-  swaggerUi.setup(swaggerFile, {
-    tagsSorter: "alpha", // or custom function
+app.use("/api-docs", swaggerUi.serve, (req, res, next) => {
+  const swaggerDocument = JSON.parse(JSON.stringify(swaggerFile));
+  swaggerDocument.host = req.get("host");
+  swaggerDocument.schemes = [req.protocol];
+  swaggerUi.setup(swaggerDocument, {
+    tagsSorter: "alpha",
     operationsSorter: "alpha",
-  }),
-);
+  })(req, res, next);
+});
 
 // ✅ Root route (for convenience)
 app.get("/", (req, res) => {
