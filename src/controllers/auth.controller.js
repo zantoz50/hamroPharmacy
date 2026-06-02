@@ -3,9 +3,10 @@
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
+const Tenant = require("../models/tanent.model");
 const jwtConfig = require("../config/jwt.config");
 const logger = require("../utils/logger");
-
+const { createTenantAdmin } = require("./tanant.controller");
 // --- REGISTER ---
 exports.register = async (req, res, next) => {
   try {
@@ -28,6 +29,11 @@ exports.register = async (req, res, next) => {
       return res
         .status(400)
         .json({ message: "Company name and subscription plan are required." });
+    }
+
+    // If registering an admin, reuse tenant controller logic
+    if (role && role.toLowerCase() === "admin") {
+      return createTenantAdmin(req, res);
     }
 
     // Check if tenant exists
@@ -54,8 +60,8 @@ exports.register = async (req, res, next) => {
       firstName,
       lastName,
       role: role || "Corporate Executive",
-      tenantId,
-      companyName: tenantId,
+      tenantId: tenant._id,
+      companyName: tenant.companyName,
       subscriptionPlan,
     });
 

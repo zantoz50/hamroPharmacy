@@ -1,6 +1,7 @@
 "use strict";
 
 const User = require("../models/user.model");
+const Tenant = require("../models/tanent.model");
 
 // GET all tenants (distinct tenantId values)
 exports.getTenants = async (req, res) => {
@@ -26,7 +27,13 @@ exports.getTenantUsers = async (req, res) => {
 // CREATE a new tenant admin user
 exports.createTenantAdmin = async (req, res) => {
   try {
-    const { email, username, password, companyName } = req.body;
+    const {
+      email,
+      username,
+      password,
+      companyName,
+      subscriptionPlan = "all",
+    } = req.body;
 
     if (!companyName) {
       return res
@@ -34,7 +41,12 @@ exports.createTenantAdmin = async (req, res) => {
         .json({ error: "Company name (tenantId) is required" });
     }
 
-    const tenantId = companyName.trim();
+    const tenantName = companyName.trim();
+    let tenant = await Tenant.findOne({ companyName: tenantName });
+    if (!tenant) {
+      tenant = new Tenant({ companyName: tenantName, subscriptionPlan });
+      await tenant.save();
+    }
 
     const exists = await User.findOne({ $or: [{ email }, { username }] });
     if (exists) {
@@ -48,8 +60,9 @@ exports.createTenantAdmin = async (req, res) => {
       username,
       password,
       role: "admin",
-      companyName,
-      tenantId,
+      companyName: tenant.companyName,
+      tenantId: tenant._id,
+      subscriptionPlan,
       firstName: "Admin",
     });
 
@@ -64,6 +77,7 @@ exports.createTenantAdmin = async (req, res) => {
         companyName: admin.companyName,
         tenantId: admin.tenantId,
         role: admin.role,
+        subscriptionPlan: admin.subscriptionPlan,
       },
     });
   } catch (err) {
