@@ -24,7 +24,7 @@ const loyaltyLedgerSchema = new mongoose.Schema({
 const systemPreferenceSchema = new mongoose.Schema(
   {
     tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       required: true,
       index: true,
     },

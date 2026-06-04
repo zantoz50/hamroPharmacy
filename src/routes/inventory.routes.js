@@ -9,6 +9,7 @@ const tenantMiddleware = require("../middleware/tenant.middleware");
 
 const router = express.Router();
 
+router.use(tenantMiddleware);
 /**
  * @swagger
  * tags:
@@ -35,8 +36,8 @@ router.post(
   controller.addInventory,
 );
 
-router.put("/:id", controller.updateInventory);
-router.delete("/:id", controller.deleteInventory);
+router.put("/:id", tenantMiddleware, controller.updateInventory);
+router.delete("/:id", tenantMiddleware, controller.deleteInventory);
 
 /**
  * @swagger

@@ -23,13 +23,13 @@ const OrderSchema = new mongoose.Schema(
       enum: ["pending", "preparing", "ready", "completed", "cancelled"],
       default: "pending",
     },
-    customerName: { type: String, required: true },
+    customerName: { type: String, default: "Guest Customer" },
     deliveryType: {
       type: String,
       enum: ["dine-in", "takeaway", "delivery"],
       required: true,
     },
-    tenantId: { type: String, required: true, index: true },
+    tenantId: { type: Number, required: true, index: true },
   },
   { timestamps: true },
 );

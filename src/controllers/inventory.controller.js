@@ -52,7 +52,15 @@ exports.getInventory = async (req, res) => {
 // Add new inventory item
 exports.addInventory = async (req, res) => {
   try {
-    const { name, sector, category, price, stock, skuIdentifier } = req.body;
+    const {
+      name,
+      sector,
+      category,
+      price,
+      stock,
+      productImageUrl,
+      skuIdentifier,
+    } = req.body;
 
     const item = new Inventory({
       tenantId: req.tenantId,
@@ -61,6 +69,7 @@ exports.addInventory = async (req, res) => {
       category,
       price: Number(price), // ensure numeric
       stock: Number(stock), // ensure numeric
+      productImageUrl,
       skuIdentifier,
     });
 

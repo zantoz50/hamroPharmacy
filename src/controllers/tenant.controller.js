@@ -61,7 +61,7 @@ exports.createTenantAdmin = async (req, res) => {
       password,
       role: "admin",
       companyName: tenant.companyName,
-      tenantId: tenant._id,
+      tenantId: tenant.tenantId,
       subscriptionPlan,
       firstName: "Admin",
     });

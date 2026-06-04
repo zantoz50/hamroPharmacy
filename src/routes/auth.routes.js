@@ -75,6 +75,81 @@ router.post(
 
 /**
  * @swagger
+ * /activate-user:
+ *   post:
+ *     summary: Activate a user under a company
+ *     description: Allows a user to register under an existing company using an activation link.
+ *     tags: [Activation]
+ *     parameters:
+ *       - in: query
+ *         name: token
+ *         required: true
+ *         schema:
+ *           type: string
+ *         description: Activation token sent via email or SMS
+ *     requestBody:
+ *       required: true
+ *       description: User signup data
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required:
+ *               - email
+ *               - password
+ *               - firstName
+ *               - lastName
+ *               - role
+ *               - sector
+ *             properties:
+ *               email:
+ *                 type: string
+ *                 format: email
+ *                 example: user@example.com
+ *               password:
+ *                 type: string
+ *                 format: password
+ *                 minLength: 6
+ *                 example: "P@ssw0rd"
+ *               firstName:
+ *                 type: string
+ *                 example: John
+ *               lastName:
+ *                 type: string
+ *                 example: Doe
+ *               role:
+ *                 type: string
+ *                 enum: [Admin, Customer, Viewer]
+ *                 example: Customer
+ *               sector:
+ *                 type: string
+ *                 example: Finance
+ *     responses:
+ *       201:
+ *         description: User activated successfully
+ *       400:
+ *         description: Invalid activation link
+ *       409:
+ *         description: Email already in use
+ */
+router.post(
+  "/activate-user",
+  [
+    check("email").isEmail().withMessage("Valid email required"),
+    check("password").isLength({ min: 6 }).withMessage("Password min length 6"),
+    check("firstName").notEmpty().withMessage("First name required"),
+    check("lastName").notEmpty().withMessage("Last name required"),
+    check("role")
+      .isIn(["Admin", "Customer", "Employee"])
+      .withMessage("Invalid role"),
+    check("sector").notEmpty().withMessage("Sector required"),
+  ],
+  validateRequest,
+  controller.activateUser,
+);
+
+/**
+ * @swagger
  * /api/auth/login:
  *   post:
  *     summary: Login with email or username

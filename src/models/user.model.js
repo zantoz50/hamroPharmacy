@@ -73,18 +73,18 @@ const UserSchema = new mongoose.Schema(
     password: { type: String, required: true },
     role: {
       type: String,
-      enum: ["admin", "user", "Corporate Executive"],
+      enum: ["Admin", "Customer", "Employee"],
       default: "user",
     },
     firstName: { type: String },
     lastName: { type: String },
-
+    sector: { type: String },
     // Tenant-based fields
     companyName: { type: String, required: true }, // e.g. "Omni Consortium"
     // tenantId: { type: String, required: true, index: true }, // unique tenant identifier
     tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: "Tenant",
+      type: Number,
+
       required: true,
     },
 

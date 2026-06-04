@@ -4,9 +4,11 @@ const express = require("express");
 const { check } = require("express-validator");
 const controller = require("../controllers/order.controller");
 const validateRequest = require("../middleware/validateRequest.middleware");
+const tenantMiddleware = require("../middleware/tenant.middleware");
 
 const router = express.Router();
 
+router.use(tenantMiddleware);
 /**
  * @swagger
  * tags:
@@ -21,7 +23,6 @@ router.post(
   [
     check("items").isArray().withMessage("Items array required"),
     check("totalPrice").isNumeric().withMessage("Total price must be numeric"),
-    check("customerName").notEmpty().withMessage("Customer name required"),
     check("deliveryType")
       .isIn(["dine-in", "takeaway", "delivery"])
       .withMessage("Valid delivery type required"),
