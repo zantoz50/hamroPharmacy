@@ -2,7 +2,7 @@
 
 const express = require("express");
 const { check } = require("express-validator");
-const controller = require("../controllers/tanant.controller");
+const controller = require("../controllers/tenant.controller");
 const validateRequest = require("../middleware/validateRequest.middleware");
 
 const router = express.Router();

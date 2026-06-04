@@ -14,7 +14,7 @@ exports.createOrder = async (req, res) => {
   const newOrder = new Order({
     items,
     totalPrice,
-    customerName,
+    customerName: "Guest Coustomer",
     deliveryType,
     tenantId: req.tenantId,
     status: "pending",

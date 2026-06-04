@@ -6,7 +6,7 @@ const User = require("../models/user.model");
 const Tenant = require("../models/tanent.model");
 const jwtConfig = require("../config/jwt.config");
 const logger = require("../utils/logger");
-const { createTenantAdmin } = require("./tanant.controller");
+const { createTenantAdmin } = require("./tenant.controller");
 // --- REGISTER ---
 exports.register = async (req, res, next) => {
   try {
@@ -60,7 +60,7 @@ exports.register = async (req, res, next) => {
       firstName,
       lastName,
       role: role || "Corporate Executive",
-      tenantId: tenant._id,
+      tenantId: tenant.tenantId,
       companyName: tenant.companyName,
       subscriptionPlan,
     });
@@ -100,6 +100,44 @@ exports.register = async (req, res, next) => {
     });
   } catch (err) {
     logger.error("Register error", err);
+    next(err);
+  }
+};
+//-- User Register --
+exports.activateUser = async (req, res, next) => {
+  try {
+    const { token } = req.query;
+    const { email, password, firstName, lastName, role, sector } = req.body;
+
+    // Verify token
+    const decoded = jwt.verify(token, jwtConfig.secret);
+    const tenant = await Tenant.findOne({ tenantId: decoded.tenantId });
+    if (!tenant) {
+      return res.status(400).json({ message: "Invalid activation link" });
+    }
+
+    // Check if email already exists
+    const exists = await User.findOne({ email });
+    if (exists) {
+      return res.status(409).json({ message: "Email already in use" });
+    }
+
+    const user = new User({
+      email,
+      password,
+      firstName,
+      lastName,
+      role, // Admin, employee, Viewer
+      sector, // optional field
+      tenantId: tenant.tenantId,
+      companyName: tenant.companyName,
+      subscriptionPlan: tenant.subscriptionPlan,
+    });
+
+    await user.save();
+
+    res.status(201).json({ message: "User activated successfully", user });
+  } catch (err) {
     next(err);
   }
 };
