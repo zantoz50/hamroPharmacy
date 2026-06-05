@@ -1,7 +1,7 @@
 // routes/category.routes.js
 const express = require("express");
 const router = express.Router();
-const controller = require("../controllers/category.controller");
+const controller = require("../controllers/utility.controller");
 const { requireAuth } = require("../middleware/auth.middleware");
 const tenantMiddleware = require("../middleware/tenant.middleware");
 
