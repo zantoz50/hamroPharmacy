@@ -2,6 +2,7 @@ const mongoose = require("mongoose");
 
 const InventoryItemSchema = new mongoose.Schema(
   {
+    inventoryId: { type: Number, unique: true }, // custom ID
     tenantId: {
       type: Number,
       required: true,
@@ -50,5 +51,16 @@ const InventoryItemSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
-
+// Pre-save hook to auto-increment inventoryId
+inventorySchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const counter = await Counter.findByIdAndUpdate(
+      { _id: "inventoryId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true },
+    );
+    this.inventoryId = counter.seq;
+  }
+  next();
+});
 module.exports = mongoose.model("InventoryItem", InventoryItemSchema);
