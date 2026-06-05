@@ -7,6 +7,7 @@ const Tenant = require("../models/tanent.model");
 const jwtConfig = require("../config/jwt.config");
 const logger = require("../utils/logger");
 const { createTenantAdmin } = require("./tenant.controller");
+
 // --- REGISTER ---
 exports.register = async (req, res, next) => {
   try {
