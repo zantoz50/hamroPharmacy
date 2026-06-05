@@ -30,7 +30,7 @@ exports.updateOrderStatus = async (req, res) => {
   const { id } = req.params;
   const { status } = req.body;
   const updated = await Order.findOneAndUpdate(
-    { _id: id, tenantId: req.tenantId },
+    { orderId: id, tenantId: req.tenantId },
     { status, updatedAt: new Date() },
     { new: true },
   );
