@@ -36,7 +36,7 @@ const OrderSchema = new mongoose.Schema(
 );
 
 // Pre-save hook to auto-increment orderId
-orderSchema.pre("save", async function (next) {
+OrderSchema.pre("save", async function (next) {
   if (this.isNew) {
     const counter = await Counter.findByIdAndUpdate(
       { _id: "orderId" },
