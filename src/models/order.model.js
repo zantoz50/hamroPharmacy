@@ -1,6 +1,7 @@
 "use strict";
 
 const mongoose = require("mongoose");
+const Counter = require("./counter.model");
 
 const OrderSchema = new mongoose.Schema(
   {

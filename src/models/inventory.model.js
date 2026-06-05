@@ -1,5 +1,5 @@
 const mongoose = require("mongoose");
-
+const Counter = require("./counter.model");
 const InventoryItemSchema = new mongoose.Schema(
   {
     inventoryId: { type: Number, unique: true }, // custom ID
@@ -52,7 +52,7 @@ const InventoryItemSchema = new mongoose.Schema(
   { timestamps: true },
 );
 // Pre-save hook to auto-increment inventoryId
-InventoryItemSchema.pre("save", async function (next) {
+inventorySchema.pre("save", async function (next) {
   if (this.isNew) {
     const counter = await Counter.findByIdAndUpdate(
       { _id: "inventoryId" },
