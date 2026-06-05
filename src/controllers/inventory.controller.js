@@ -97,7 +97,7 @@ exports.updateInventory = async (req, res) => {
     const updates = req.body;
 
     const item = await Inventory.findOneAndUpdate(
-      { _id: id, tenantId: req.tenantId },
+      { inventoryId: id, tenantId: req.tenantId },
       updates,
       { new: true },
     );
@@ -122,7 +122,7 @@ exports.deleteInventory = async (req, res) => {
     const { id } = req.params;
 
     const item = await Inventory.findOneAndDelete({
-      _id: id,
+      inventoryId: id,
       tenantId: req.tenantId,
     });
 
