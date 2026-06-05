@@ -28,22 +28,29 @@ const InventoryItemSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
+    cost: { type: Number, required: true, min: 0 },
     stock: {
       type: Number,
       required: false,
       min: 0,
     },
-    skuIdentifier: {
+    minStock: {
+      type: Number,
+      required: true,
+      min: 0,
+      default: 0,
+    },
+    sku: {
       type: String,
       trim: true,
       unique: true,
     },
-    discount: {
+    discountPct: {
       type: Number,
       default: 0,
       min: 0,
     },
-    productImageUrl: {
+    image: {
       type: String,
       default: null,
       trim: true,

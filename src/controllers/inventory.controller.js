@@ -57,9 +57,12 @@ exports.addInventory = async (req, res) => {
       sector,
       category,
       price,
+      cost,
       stock,
-      productImageUrl,
-      skuIdentifier,
+      minStock,
+      image,
+      discountPrc,
+      sku,
     } = req.body;
 
     const item = new Inventory({
@@ -68,9 +71,12 @@ exports.addInventory = async (req, res) => {
       sector,
       category,
       price: Number(price), // ensure numeric
-      stock: Number(stock), // ensure numeric
-      productImageUrl,
-      skuIdentifier,
+      cost: Number(cost),
+      stock: Number(stock),
+      minStock,
+      discountPrc, // ensure numeric
+      image,
+      sku,
     });
 
     await item.save();
