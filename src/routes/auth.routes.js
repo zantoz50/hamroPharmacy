@@ -140,7 +140,7 @@ router.post(
     check("firstName").notEmpty().withMessage("First name required"),
     check("lastName").notEmpty().withMessage("Last name required"),
     check("role")
-      .isIn(["Admin", "Customer", "Employee"])
+      .isIn(["admin", "customer", "employee"])
       .withMessage("Invalid role"),
     check("sector").notEmpty().withMessage("Sector required"),
   ],
