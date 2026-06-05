@@ -4,6 +4,7 @@ const mongoose = require("mongoose");
 
 const OrderSchema = new mongoose.Schema(
   {
+    orderId: { type: Number, unique: true }, // custom auto-increment ID
     sector: {
       type: String,
       enum: ["restaurant", "cafeteria", "mart"],
@@ -33,5 +34,18 @@ const OrderSchema = new mongoose.Schema(
   },
   { timestamps: true },
 );
+
+// Pre-save hook to auto-increment orderId
+orderSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const counter = await Counter.findByIdAndUpdate(
+      { _id: "orderId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true },
+    );
+    this.orderId = counter.seq;
+  }
+  next();
+});
 
 module.exports = mongoose.model("Order", OrderSchema);
