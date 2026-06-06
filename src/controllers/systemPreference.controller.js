@@ -140,14 +140,13 @@ exports.addCategory = async (req, res) => {
 
 exports.getCategories = async (req, res) => {
   try {
-    const categories = await Category.find({ tenantId: req.tenantId }).populate(
-      "sector",
-    );
-    res.status(200).json(categories);
+    const categories = await Category.find({ tenantId: req.tenantId });
+    res.status(200).json({ categories });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching categories", error: error.message });
+    res.status(500).json({
+      message: "Error fetching categories",
+      error: error.message,
+    });
   }
 };
 
@@ -176,37 +175,33 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
-// Get all sectors and categories
-exports.getSectorsAndCategories = async (req, res) => {
+// Get all Categories by Sector
+exports.getCategoriesBySectorId = async (req, res) => {
   try {
-    const { categoryId } = req.params;
+    const { sectorId } = req.params;
 
-    // Find category by ID and tenant scope
-    const category = await Category.findOne({
-      _id: categoryId,
+    // Find categories for this tenant under the given sector
+    const categories = await Category.find({
       tenantId: req.tenantId,
-    }).populate("sector");
+      sector: sectorId, // sector must be ObjectId ref in Category schema
+    });
 
-    if (!category) {
-      return res.status(404).json({ message: "Category not found" });
+    if (!categories || categories.length === 0) {
+      return res
+        .status(404)
+        .json({ message: "No categories found for this sector" });
     }
 
-    res.status(200).json({
-      category: {
-        id: category._id,
-        name: category.name,
-      },
-      sector: category.sector
-        ? {
-            id: category.sector._id,
-            name: category.sector.name,
-            description: category.sector.description,
-          }
-        : null,
-    });
+    // Return only the categories list
+    res.status(200).json(
+      categories.map((cat) => ({
+        id: cat._id,
+        name: cat.name,
+      })),
+    );
   } catch (error) {
     res.status(500).json({
-      message: "Error fetching sector by category ID",
+      message: "Error fetching categories by sector",
       error: error.message,
     });
   }

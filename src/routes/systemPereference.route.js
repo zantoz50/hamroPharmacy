@@ -173,11 +173,12 @@ router.put(
   tenantMiddleware,
   controller.updateCategory,
 );
+
 router.get(
-  "/sectors-categories",
+  "/sectors/:sectorId",
   requireAuth,
   tenantMiddleware,
-  controller.getSectorsAndCategories,
+  controller.getCategoriesBySectorId,
 );
 
 module.exports = router;
