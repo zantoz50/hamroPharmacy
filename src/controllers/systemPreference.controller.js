@@ -1,7 +1,7 @@
 "use strict";
 // controllers/systemPreference.controller.js
 const SystemPreference = require("../models/systemPreference.model");
-
+const { Sector, Category } = require("../models/utilits.model");
 // Get system preferences
 exports.getPreferences = async (req, res) => {
   try {
@@ -63,66 +63,151 @@ exports.uploadLogo = async (req, res) => {
 // Add a new sector
 exports.addSector = async (req, res) => {
   try {
-    const { sector } = req.body;
-    if (!sector)
-      return res.status(400).json({ message: "Sector name required" });
+    const { name, description } = req.body;
 
-    const prefs = await SystemPreference.findOneAndUpdate(
-      { tenantId: req.tenantId },
-      { $addToSet: { sectors: sector } }, // avoid duplicates
-      { new: true, upsert: true },
-    );
+    const sector = new Sector({
+      tenantId: req.tenantId,
+      name,
+      description,
+    });
 
-    res
-      .status(200)
-      .json({ message: "Sector added successfully", sectors: prefs.sectors });
+    await sector.save();
+    res.status(201).json({ message: "Sector created successfully", sector });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error adding sector", error: error.message });
+      .json({ message: "Error creating sector", error: error.message });
+  }
+};
+
+exports.getSectors = async (req, res) => {
+  try {
+    const sectors = await Sector.find({ tenantId: req.tenantId });
+    res.status(200).json(sectors);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching sectors", error: error.message });
+  }
+};
+
+exports.updateSector = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const item = await Sector.findOneAndUpdate(
+      { sectorId: id, tenantId: req.tenantId },
+      updates,
+      { new: true },
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Sector not found" });
+    }
+
+    res
+      .status(200)
+      .json({ message: "Sector updated successfully", sectors: item });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error updating sector", error: error.message });
   }
 };
 
 // Add a new category
 exports.addCategory = async (req, res) => {
   try {
-    const { category } = req.body;
-    if (!category)
-      return res.status(400).json({ message: "Category name required" });
+    const { name, sectorId } = req.body;
 
-    const prefs = await SystemPreference.findOneAndUpdate(
-      { tenantId: req.tenantId },
-      { $addToSet: { categories: category } },
-      { new: true, upsert: true },
-    );
+    const category = new Category({
+      tenantId: req.tenantId,
+      name,
+      sectorId,
+    });
 
+    await category.save();
     res
-      .status(200)
-      .json({
-        message: "Category added successfully",
-        categories: prefs.categories,
-      });
+      .status(201)
+      .json({ message: "Category created successfully", category });
   } catch (error) {
     res
       .status(500)
-      .json({ message: "Error adding category", error: error.message });
+      .json({ message: "Error creating category", error: error.message });
+  }
+};
+
+exports.getCategories = async (req, res) => {
+  try {
+    const categories = await Category.find({ tenantId: req.tenantId }).populate(
+      "sector",
+    );
+    res.status(200).json(categories);
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error fetching categories", error: error.message });
+  }
+};
+
+exports.updateCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const updates = req.body;
+
+    const item = await Category.findOneAndUpdate(
+      { categoryId: id, tenantId: req.tenantId },
+      updates,
+      { new: true },
+    );
+
+    if (!item) {
+      return res.status(404).json({ message: "Category item not found" });
+    }
+    res.status(200).json({
+      message: "Category updated successfully",
+      categories: prefs.categories,
+    });
+  } catch (error) {
+    res
+      .status(500)
+      .json({ message: "Error updating category", error: error.message });
   }
 };
 
 // Get all sectors and categories
 exports.getSectorsAndCategories = async (req, res) => {
   try {
-    const prefs = await SystemPreference.findOne({ tenantId: req.tenantId });
+    const { categoryId } = req.params;
+
+    // Find category by ID and tenant scope
+    const category = await Category.findOne({
+      _id: categoryId,
+      tenantId: req.tenantId,
+    }).populate("sector");
+
+    if (!category) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
     res.status(200).json({
-      sectors: prefs?.sectors || [],
-      categories: prefs?.categories || [],
+      category: {
+        id: category._id,
+        name: category.name,
+      },
+      sector: category.sector
+        ? {
+            id: category.sector._id,
+            name: category.sector.name,
+            description: category.sector.description,
+          }
+        : null,
     });
   } catch (error) {
-    res
-      .status(500)
-      .json({
-        message: "Error fetching sectors/categories",
-        error: error.message,
-      });
+    res.status(500).json({
+      message: "Error fetching sector by category ID",
+      error: error.message,
+    });
   }
 };

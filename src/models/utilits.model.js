@@ -1,8 +1,8 @@
-// models/sector.model.js
 const mongoose = require("mongoose");
-
+const Counter = require("./counter.model");
 const sectorSchema = new mongoose.Schema(
   {
+    sectorId: { type: Number, unique: true }, // custom ID
     name: {
       type: String,
       enum: ["restaurant", "cafeteria", "mart"],
@@ -13,26 +13,36 @@ const sectorSchema = new mongoose.Schema(
     tenantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tenant",
-      required: true,
+      required: false,
     },
   },
   { timestamps: true },
 );
-
-module.exports = mongoose.model("Sector", sectorSchema);
-
-// models/category.model.js
+// Pre-save hook to auto-increment inventoryId
+sectorSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const counter = await Counter.findByIdAndUpdate(
+      { _id: "sectorId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true },
+    );
+    this.sectorId = counter.seq;
+  }
+  next();
+});
 
 const categorySchema = new mongoose.Schema(
   {
+    categoryId: { type: Number, unique: true }, // custom ID
     name: { type: String, required: true, trim: true },
-    sector: {
-      type: mongoose.Schema.Types.ObjectId,
+    sectorId: {
+      type: Number,
       ref: "Sector",
       required: true,
     },
     tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
+      // type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Tenant",
       required: true,
     },
@@ -40,4 +50,19 @@ const categorySchema = new mongoose.Schema(
   { timestamps: true },
 );
 
-module.exports = mongoose.model("Category", categorySchema);
+// Pre-save hook to auto-increment inventoryId
+categorySchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const counter = await Counter.findByIdAndUpdate(
+      { _id: "categoryId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true },
+    );
+    this.categoryId = counter.seq;
+  }
+  next();
+});
+
+const Sector = (module.exports = mongoose.model("Sector", sectorSchema));
+const Category = (module.exports = mongoose.model("Category", categorySchema));
+module.exports = { Sector, Category };

@@ -56,3 +56,102 @@ if (require.main === module) {
 }
 
 module.exports = doc;
+// "use strict";
+
+// const swaggerJsdoc = require("swagger-jsdoc");
+// const path = require("path");
+
+// const options = {
+//   definition: {
+//     openapi: "3.0.0",
+//     info: {
+//       title: "Inventory API",
+//       version: "1.0.0",
+//       description: "API documentation for Inventory Management System",
+//     },
+//     servers: [
+//       {
+//         url: "http://localhost:3000/api/v1",
+//       },
+//     ],
+//     tags: [
+//       { name: "Authentication", description: "Authentication endpoints" },
+//       { name: "Tenants", description: "Tenant management endpoints" },
+//       { name: "Inventory", description: "Inventory management endpoints" },
+//       {
+//         name: "RawMaterials",
+//         description: "Raw material management endpoints",
+//       },
+//       { name: "Orders", description: "Order processing endpoints" },
+//       { name: "Categories", description: "Category management under sectors" },
+//       { name: "Sectors", description: "Sector management endpoints" },
+//       {
+//         name: "SystemPreferences",
+//         description: "System preference and metadata endpoints",
+//       },
+//     ],
+//     components: {
+//       securitySchemes: {
+//         bearerAuth: {
+//           type: "http",
+//           scheme: "bearer",
+//           bearerFormat: "JWT",
+//           description:
+//             "JWT authorization header using the Bearer scheme. Example: 'Bearer <token>'",
+//         },
+//       },
+//       //       servers: [
+//       //   {
+//       //     url: `${process.env.SWAGGER_SCHEME || "http"}://${process.env.SWAGGER_HOST || "localhost:3000"}/api/v1`
+//       //   }
+//       // ],
+//       schemas: {
+//         Sector: {
+//           type: "object",
+//           properties: {
+//             sectorId: { type: "integer", example: 1 },
+//             name: {
+//               type: "string",
+//               enum: ["restaurant", "cafeteria", "mart"],
+//               example: "restaurant",
+//             },
+//             description: { type: "string", example: "Restaurant sector" },
+//             tenantId: {
+//               type: "string",
+//               format: "objectId",
+//               example: "60f7c0f9b54764421b7156a1",
+//             },
+//           },
+//           required: ["name", "tenantId"],
+//         },
+//         Category: {
+//           type: "object",
+//           properties: {
+//             categoryId: { type: "integer", example: 1 },
+//             name: { type: "string", example: "Starter" },
+//             sector: {
+//               type: "string",
+//               format: "objectId",
+//               example: "60f7c0f9b54764421b7156a2",
+//             },
+//             tenantId: {
+//               type: "string",
+//               format: "objectId",
+//               example: "60f7c0f9b54764421b7156a1",
+//             },
+//           },
+//           required: ["name", "sector", "tenantId"],
+//         },
+//       },
+//     },
+//     security: [{ bearerAuth: [] }],
+//   },
+//   apis: [
+//     path.join(__dirname, "../routes/**/*.js"),
+//     path.join(__dirname, "../app.js"),
+//   ],
+// };
+
+// const swaggerSpec = swaggerJsdoc(options);
+// console.log("Swagger specification generated successfully");
+// module.exports = swaggerSpec;
