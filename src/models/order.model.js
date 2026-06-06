@@ -6,9 +6,9 @@ const Counter = require("./counter.model");
 const OrderSchema = new mongoose.Schema(
   {
     orderId: { type: Number, unique: true }, // custom auto-increment ID
-    sector: {
-      type: String,
-      enum: ["restaurant", "cafeteria", "mart"],
+    sectorId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Sector",
       required: true,
     },
     items: [
@@ -31,7 +31,12 @@ const OrderSchema = new mongoose.Schema(
       enum: ["dine-in", "takeaway", "delivery"],
       required: true,
     },
-    tenantId: { type: Number, required: true, index: true },
+    tenantId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "Tenant",
+      required: true,
+      index: true,
+    },
   },
   { timestamps: true },
 );

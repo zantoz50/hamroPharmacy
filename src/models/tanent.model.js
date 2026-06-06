@@ -3,7 +3,7 @@ const mongoose = require("mongoose");
 const Counter = require("./counter.model");
 const tenantSchema = new mongoose.Schema(
   {
-    tenantId: { type: Number, unique: true }, // auto-increment field
+    tenantId: { type: Number, unique: true, index: true }, // auto-increment field
     companyName: { type: String, required: true, unique: true, trim: true },
     subscriptionPlan: { type: String, required: true }, // e.g. "restaurant", "cafeteria", "mart", "all"
     createdAt: { type: Date, default: Date.now },
