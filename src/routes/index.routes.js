@@ -10,6 +10,7 @@ const rawMaterialRoutes = require("./rawMaterials");
 const orderRoutes = require("./order.routes");
 const systemPreferenceRoutes = require("./systemPereference.route");
 const utilityRoutes = require("./utility.routes");
+const invoiceRoutes = require("./invoice.route");
 // const patientRoutes = require("./patient.routes");
 // const diseaseRoutes = require("./disease.routes");
 // const locationRoutes = require("./location.routes");
@@ -24,5 +25,6 @@ router.use("/utilities", utilityRoutes);
 // router.use("/patient", patientRoutes);
 // router.use("/disease", diseaseRoutes);
 // router.use("/location", locationRoutes);
+router.use("/invoices", invoiceRoutes);
 
 module.exports = router;
