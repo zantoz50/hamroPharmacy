@@ -32,7 +32,7 @@ const OrderSchema = new mongoose.Schema(
       required: true,
     },
     tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Tenant",
       required: true,
       index: true,
