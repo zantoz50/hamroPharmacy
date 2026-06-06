@@ -3,6 +3,8 @@
 const User = require("../models/user.model");
 const Tenant = require("../models/tanent.model");
 const SystemPreference = require("../models/systemPreference.model");
+const { Sector } = require("../models/utilits.model");
+
 // GET all tenants (distinct tenantId values)
 exports.getTenants = async (req, res) => {
   try {
@@ -67,6 +69,20 @@ exports.createTenantAdmin = async (req, res) => {
     });
 
     await admin.save();
+
+    // Auto‑create sectors from subscription plan
+    const sectorNames = subscriptionPlan.split(","); // e.g. "restaurant,cafeteria"
+    const sectors = await Promise.all(
+      sectorNames.map(async (name, index) => {
+        const sector = new Sector({
+          sectorId: index + 1,
+          name,
+          description: `${name} sector`,
+          tenantId: tenant.tenantId,
+        });
+        return sector.save();
+      }),
+    );
 
     // 3. Initialize default preferences
     const prefs = new SystemPreference({
