@@ -1,4 +1,3 @@
-// models/sector.model.js
 const mongoose = require("mongoose");
 const Counter = require("./counter.model");
 const sectorSchema = new mongoose.Schema(
@@ -14,7 +13,7 @@ const sectorSchema = new mongoose.Schema(
     tenantId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: "Tenant",
-      required: true,
+      required: false,
     },
   },
   { timestamps: true },
@@ -27,25 +26,23 @@ sectorSchema.pre("save", async function (next) {
       { $inc: { seq: 1 } },
       { new: true, upsert: true },
     );
-    this.inventoryId = counter.seq;
+    this.sectorId = counter.seq;
   }
   next();
 });
-module.exports = mongoose.model("Sector", sectorSchema);
-
-// models/category.model.js
 
 const categorySchema = new mongoose.Schema(
   {
     categoryId: { type: Number, unique: true }, // custom ID
     name: { type: String, required: true, trim: true },
     sectorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Sector",
       required: true,
     },
     tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
+      // type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Tenant",
       required: true,
     },
@@ -61,9 +58,11 @@ categorySchema.pre("save", async function (next) {
       { $inc: { seq: 1 } },
       { new: true, upsert: true },
     );
-    this.inventoryId = counter.seq;
+    this.categoryId = counter.seq;
   }
   next();
 });
 
-module.exports = mongoose.model("Category", categorySchema);
+const Sector = (module.exports = mongoose.model("Sector", sectorSchema));
+const Category = (module.exports = mongoose.model("Category", categorySchema));
+module.exports = { Sector, Category };

@@ -11,6 +11,7 @@
     "lint": "eslint .",
     "seed-admin": "bash scripts/seed-admin.sh",
     "swagger:generate": "node src/config/swagger.js",
+    "swagger:generateautogen": "node src/config/swagger-autogen.js",
     "debug": "node --inspect src/index.js"
   },
   "keywords": [

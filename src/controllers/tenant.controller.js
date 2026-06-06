@@ -2,7 +2,7 @@
 
 const User = require("../models/user.model");
 const Tenant = require("../models/tanent.model");
-
+const SystemPreference = require("../models/systemPreference.model");
 // GET all tenants (distinct tenantId values)
 exports.getTenants = async (req, res) => {
   try {
@@ -67,6 +67,25 @@ exports.createTenantAdmin = async (req, res) => {
     });
 
     await admin.save();
+
+    // 3. Initialize default preferences
+    const prefs = new SystemPreference({
+      tenantId: tenant.tenantId,
+      companyName: tenant.companyName,
+      baseCurrency: "INR",
+      systemLanguage: "English",
+      rewardMatrix: [
+        { role: "Admin", multiplier: 2 },
+        { role: "Customer", multiplier: 1 },
+      ],
+      sectorLoyaltySettings: [], //{ sector: "restaurant", earnWeight: 1.5 }
+      activeOffers: [], //{ description: "Summer Sale", discountPercent: 20 }
+      promoCampaigns: [],
+      loyaltyLedgers: [], //{ memberName: "John Doe", points: 100 }
+      sectors: subscriptionPlan,
+      categories: [],
+    });
+    await prefs.save();
 
     res.status(201).json({
       success: true,

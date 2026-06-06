@@ -3,7 +3,8 @@
 const express = require("express");
 const multer = require("multer");
 const controller = require("../controllers/systemPreference.controller");
-
+const { requireAuth } = require("../middleware/auth.middleware");
+const tenantMiddleware = require("../middleware/tenant.middleware");
 const router = express.Router();
 
 // Multer setup for logo upload
@@ -35,7 +36,7 @@ router.post("/logo", upload.single("logo"), controller.uploadLogo);
  * /system-preferences/sectors:
  *   post:
  *     tags: [SystemPreferences]
- *     summary: Add a new sector Santosh
+ *     summary: Add a new sector Santosh Thapa
  *     requestBody:
  *       required: true
  *       content:
@@ -154,9 +155,29 @@ router.post("/logo", upload.single("logo"), controller.uploadLogo);
 router.post("/sectors", controller.addSector);
 router.get("/sectors", controller.getSectors);
 router.put("/sectors/:sector", controller.updateSector);
-router.post("/categories", controller.addCategory);
-router.get("/categories", controller.getCategories);
-router.put("/categories/:category", controller.updateCategory);
-router.get("/sectors-categories", controller.getSectorsAndCategories);
+router.post(
+  "/categories",
+  requireAuth,
+  tenantMiddleware,
+  controller.addCategory,
+);
+router.get(
+  "/categories",
+  requireAuth,
+  tenantMiddleware,
+  controller.getCategories,
+);
+router.put(
+  "/categories/:category",
+  requireAuth,
+  tenantMiddleware,
+  controller.updateCategory,
+);
+router.get(
+  "/sectors-categories",
+  requireAuth,
+  tenantMiddleware,
+  controller.getSectorsAndCategories,
+);
 
 module.exports = router;

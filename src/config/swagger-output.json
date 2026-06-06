@@ -29,7 +29,9 @@
       "description": "Order processing endpoints"
     }
   ],
-  "schemes": ["http"],
+  "schemes": [
+    "http"
+  ],
   "securityDefinitions": {
     "bearerAuth": {
       "type": "apiKey",
@@ -1076,30 +1078,27 @@
     },
     "/system-preferences/sectors": {
       "post": {
-        "description": "Add a new sector",
+        "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
-            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "sector": {
-                  "type": "string",
-                  "example": "Retail"
+                "name": {
+                  "example": "any"
+                },
+                "description": {
+                  "example": "any"
                 }
-              },
-              "required": ["sector"]
+              }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Sector added successfully"
-          },
-          "400": {
-            "description": "Bad Request"
+          "201": {
+            "description": "Created"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1107,10 +1106,10 @@
         }
       },
       "get": {
-        "description": "Get all sectors",
+        "description": "",
         "responses": {
           "200": {
-            "description": "List of sectors"
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1120,40 +1119,21 @@
     },
     "/system-preferences/sectors/{sector}": {
       "put": {
-        "description": "Update an existing sector",
+        "description": "",
         "parameters": [
           {
             "name": "sector",
             "in": "path",
             "required": true,
-            "type": "string",
-            "description": "Existing sector name to update"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "newSector": {
-                  "type": "string",
-                  "example": "Pharmacy"
-                }
-              },
-              "required": ["newSector"]
-            }
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Sector updated successfully"
-          },
-          "400": {
-            "description": "Bad Request"
+            "description": "OK"
           },
           "404": {
-            "description": "Sector not found"
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1163,30 +1143,27 @@
     },
     "/system-preferences/categories": {
       "post": {
-        "description": "Add a new category",
+        "description": "",
         "parameters": [
           {
             "name": "body",
             "in": "body",
-            "required": true,
             "schema": {
               "type": "object",
               "properties": {
-                "category": {
-                  "type": "string",
-                  "example": "OTC"
+                "name": {
+                  "example": "any"
+                },
+                "sector": {
+                  "example": "any"
                 }
-              },
-              "required": ["category"]
+              }
             }
           }
         ],
         "responses": {
-          "200": {
-            "description": "Category added successfully"
-          },
-          "400": {
-            "description": "Bad Request"
+          "201": {
+            "description": "Created"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1194,10 +1171,10 @@
         }
       },
       "get": {
-        "description": "Get all categories",
+        "description": "",
         "responses": {
           "200": {
-            "description": "List of categories"
+            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1207,40 +1184,21 @@
     },
     "/system-preferences/categories/{category}": {
       "put": {
-        "description": "Update an existing category",
+        "description": "",
         "parameters": [
           {
             "name": "category",
             "in": "path",
             "required": true,
-            "type": "string",
-            "description": "Existing category name to update"
-          },
-          {
-            "name": "body",
-            "in": "body",
-            "required": true,
-            "schema": {
-              "type": "object",
-              "properties": {
-                "newCategory": {
-                  "type": "string",
-                  "example": "Nutraceuticals"
-                }
-              },
-              "required": ["newCategory"]
-            }
+            "type": "string"
           }
         ],
         "responses": {
           "200": {
-            "description": "Category updated successfully"
-          },
-          "400": {
-            "description": "Bad Request"
+            "description": "OK"
           },
           "404": {
-            "description": "Category not found"
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1250,10 +1208,13 @@
     },
     "/system-preferences/sectors-categories": {
       "get": {
-        "description": "Get sectors and categories together",
+        "description": "",
         "responses": {
           "200": {
-            "description": "Sectors and categories returned successfully"
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1623,7 +1584,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "sector": {
+                "name": {
+                  "example": "any"
+                },
+                "description": {
                   "example": "any"
                 }
               }
@@ -1631,11 +1595,43 @@
           }
         ],
         "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "responses": {
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/sectors/{sector}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "sector",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1653,7 +1649,10 @@
             "schema": {
               "type": "object",
               "properties": {
-                "category": {
+                "name": {
+                  "example": "any"
+                },
+                "sector": {
                   "example": "any"
                 }
               }
@@ -1661,11 +1660,43 @@
           }
         ],
         "responses": {
+          "201": {
+            "description": "Created"
+          },
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      },
+      "get": {
+        "description": "",
+        "responses": {
           "200": {
             "description": "OK"
           },
-          "400": {
-            "description": "Bad Request"
+          "500": {
+            "description": "Internal Server Error"
+          }
+        }
+      }
+    },
+    "/categories/{category}": {
+      "put": {
+        "description": "",
+        "parameters": [
+          {
+            "name": "category",
+            "in": "path",
+            "required": true,
+            "type": "string"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"
@@ -1679,6 +1710,9 @@
         "responses": {
           "200": {
             "description": "OK"
+          },
+          "404": {
+            "description": "Not Found"
           },
           "500": {
             "description": "Internal Server Error"

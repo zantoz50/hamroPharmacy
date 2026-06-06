@@ -108,7 +108,7 @@ exports.updateSector = async (req, res) => {
 
     res
       .status(200)
-      .json({ message: "Sector updated successfully", sectors: prefs.sectors });
+      .json({ message: "Sector updated successfully", sectors: item });
   } catch (error) {
     res
       .status(500)
@@ -119,12 +119,12 @@ exports.updateSector = async (req, res) => {
 // Add a new category
 exports.addCategory = async (req, res) => {
   try {
-    const { name, sector } = req.body;
+    const { name, sectorId } = req.body;
 
     const category = new Category({
       tenantId: req.tenantId,
       name,
-      sector,
+      sectorId,
     });
 
     await category.save();
