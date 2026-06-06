@@ -14,7 +14,7 @@ const AuditLogSchema = new mongoose.Schema(
     role: { type: String, required: true },
     action: { type: String, required: true },
     details: { type: String, required: true },
-    tenantId: { type: String, required: true, index: true },
+    tenantId: { type: Number, required: true, index: true },
   },
   { timestamps: true },
 );

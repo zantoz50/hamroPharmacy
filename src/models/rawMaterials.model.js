@@ -6,7 +6,7 @@ const mongoose = require("mongoose");
 const RawMaterialSchema = new mongoose.Schema(
   {
     tenantId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       required: true,
       index: true, // multi-tenant isolation
     },
