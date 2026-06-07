@@ -153,7 +153,7 @@ router.post("/logo", upload.single("logo"), controller.uploadLogo);
  *         description: Sectors and categories returned successfully
  */
 router.post("/sectors", controller.addSector);
-router.get("/sectors", controller.getSectors);
+router.get("/sectors", requireAuth, tenantMiddleware, controller.getSectors);
 router.put("/sectors/:sector", controller.updateSector);
 router.post(
   "/categories",
