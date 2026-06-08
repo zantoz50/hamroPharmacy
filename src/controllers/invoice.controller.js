@@ -3,11 +3,18 @@ const Order = require("../models/order.model");
 
 exports.createInvoice = async (req, res) => {
   try {
-    const { orderId } = req.body;
+    const {
+      orderId,
+      sectorId,
+      deliveryType,
+      invoiceDate,
+      totalAmount,
+      paymentStatus,
+    } = req.body;
 
     // Find order
     const order = await Order.findOne({
-      _id: orderId,
+      invoiceId: req.invoiceId,
       tenantId: req.tenantId,
     }).populate("sectorId");
 
@@ -17,10 +24,12 @@ exports.createInvoice = async (req, res) => {
 
     // Create invoice from order
     const invoice = new Invoice({
-      orderId: order._id,
+      orderId: order.orderId,
       tenantId: order.tenantId,
       sectorId: order.sectorId,
+      deliveryType: order.deliveryType,
       totalAmount: order.totalPrice,
+      paymentStatus: order.paymentStatus,
     });
 
     await invoice.save();
