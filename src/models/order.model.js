@@ -7,13 +7,13 @@ const OrderSchema = new mongoose.Schema(
   {
     orderId: { type: Number, unique: true }, // custom auto-increment ID
     sectorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Sector",
       required: true,
     },
     items: [
       {
-        itemId: { type: String, required: true },
+        inventoryId: { type: String, required: true },
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
         priceOnOrder: { type: Number, required: true },

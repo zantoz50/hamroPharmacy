@@ -175,6 +175,30 @@ exports.updateCategory = async (req, res) => {
   }
 };
 
+exports.deleteCategory = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    const deleted = await Category.findOneAndDelete({
+      categoryId: id,
+      tenantId: req.tenantId,
+    });
+
+    if (!deleted) {
+      return res.status(404).json({ message: "Category not found" });
+    }
+
+    res.status(200).json({
+      message: "Category deleted successfully",
+      category: deleted,
+    });
+  } catch (error) {
+    res.status(500).json({
+      message: "Error deleting category",
+      error: error.message,
+    });
+  }
+};
 // Get all Categories by Sector
 exports.getCategoriesBySectorId = async (req, res) => {
   try {

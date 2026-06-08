@@ -5,7 +5,7 @@ const InvoiceSchema = new mongoose.Schema(
   {
     invoiceId: { type: Number, unique: true },
     orderId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Order",
       required: true,
     },
@@ -15,8 +15,13 @@ const InvoiceSchema = new mongoose.Schema(
       required: true,
     },
     sectorId: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Number,
       ref: "Sector",
+      required: true,
+    },
+    deliveryType: {
+      type: String,
+      enum: ["dine-in", "takeaway", "delivery"],
       required: true,
     },
     invoiceDate: { type: Date, default: Date.now },
