@@ -95,7 +95,7 @@ exports.createOrder = async (req, res) => {
     // ✅ Create invoice if order is pending
     if (newOrder.status === "pending") {
       const newInvoice = new Invoice({
-        orderId: newOrder._id,
+        orderId: newOrder.orderId,
         tenantId: req.tenantId,
         sectorId,
         deliveryType,
