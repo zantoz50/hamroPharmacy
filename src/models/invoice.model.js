@@ -39,7 +39,7 @@ const InvoiceSchema = new mongoose.Schema(
 InvoiceSchema.pre("save", async function (next) {
   if (this.isNew) {
     const counter = await Counter.findByIdAndUpdate(
-      { invoiceId: "invoiceId" },
+      { _id: "invoiceId" },
       { $inc: { seq: 1 } },
       { new: true, upsert: true },
     );
