@@ -174,6 +174,14 @@ router.put(
   controller.updateCategory,
 );
 
+// Delete category
+router.delete(
+  "/categories/:id",
+  requireAuth,
+  tenantMiddleware,
+  controller.deleteCategory,
+);
+
 router.get(
   "/sectors/:sectorId",
   requireAuth,
