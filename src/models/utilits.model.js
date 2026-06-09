@@ -10,6 +10,10 @@ const sectorSchema = new mongoose.Schema(
       unique: true,
     },
     description: { type: String },
+    isActive: {
+      type: Boolean,
+      default: false,
+    },
     tenantId: {
       type: Number,
       ref: "Tenant",
@@ -44,6 +48,10 @@ const categorySchema = new mongoose.Schema(
       type: Number,
       ref: "Tenant",
       required: true,
+    },
+    isActive: {
+      type: Boolean,
+      default: false,
     },
   },
   { timestamps: true },

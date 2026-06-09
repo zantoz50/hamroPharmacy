@@ -63,12 +63,13 @@ exports.uploadLogo = async (req, res) => {
 // Add a new sector
 exports.addSector = async (req, res) => {
   try {
-    const { name, description } = req.body;
+    const { name, description, isActive } = req.body;
 
     const sector = new Sector({
       tenantId: req.tenantId,
       name,
       description,
+      isActive,
     });
 
     await sector.save();
@@ -119,12 +120,13 @@ exports.updateSector = async (req, res) => {
 // Add a new category
 exports.addCategory = async (req, res) => {
   try {
-    const { name, sectorId } = req.body;
+    const { name, sectorId, isActive } = req.body;
 
     const category = new Category({
       tenantId: req.tenantId,
       name,
       sectorId,
+      isActive,
     });
 
     await category.save();
