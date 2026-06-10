@@ -5,6 +5,8 @@ const { check } = require("express-validator");
 const controller = require("../controllers/auth.controller");
 const validateRequest = require("../middleware/validateRequest.middleware");
 
+const { requireAuth } = require("../middleware/auth.middleware");
+const tenantMiddleWare = require("../middleware/tenant.middleware");
 const router = express.Router();
 
 /**
@@ -142,11 +144,13 @@ router.post(
     check("role")
       .isIn(["admin", "customer", "employee"])
       .withMessage("Invalid role"),
-    check("sector").notEmpty().withMessage("Sector required"),
   ],
   validateRequest,
+  requireAuth,
   controller.activateUser,
 );
+
+router.get("/users", requireAuth, tenantMiddleWare, controller.getUser);
 
 /**
  * @swagger

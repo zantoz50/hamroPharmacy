@@ -104,18 +104,24 @@ exports.register = async (req, res, next) => {
     next(err);
   }
 };
-//-- User Register --
+
 exports.activateUser = async (req, res, next) => {
   try {
-    const { token } = req.query;
-    const { email, password, firstName, lastName, role, sector } = req.body;
+    const authHeader = req.headers.authorization;
+    if (!authHeader) {
+      return res.status(401).json({ message: "No token provided" });
+    }
 
-    // Verify token
+    const token = authHeader.split(" ")[1]; // remove "Bearer"
     const decoded = jwt.verify(token, jwtConfig.secret);
+
     const tenant = await Tenant.findOne({ tenantId: decoded.tenantId });
     if (!tenant) {
       return res.status(400).json({ message: "Invalid activation link" });
     }
+
+    const { email, password, firstName, lastName, username, role, sector } =
+      req.body;
 
     // Check if email already exists
     const exists = await User.findOne({ email });
@@ -128,6 +134,7 @@ exports.activateUser = async (req, res, next) => {
       password,
       firstName,
       lastName,
+      username,
       role, // Admin, employee, Viewer
       sector, // optional field
       tenantId: tenant.tenantId,
@@ -142,60 +149,6 @@ exports.activateUser = async (req, res, next) => {
     next(err);
   }
 };
-
-// --- LOGIN ---
-// exports.login = async (req, res, next) => {
-//   try {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(422).json({ errors: errors.array() });
-//     }
-
-//     const { email, username, password } = req.body;
-//     if (!password || (!email && !username)) {
-//       return res
-//         .status(400)
-//         .json({ message: "Email or username and password are required" });
-//     }
-
-//     // Find user by email OR username
-//     const user = await User.findOne({
-//       $or: [
-//         email ? { email: email.trim().toLowerCase() } : null,
-//         username ? { username: username.trim().toLowerCase() } : null,
-//       ].filter(Boolean),
-//     });
-
-//     if (!user) return res.status(401).json({ message: "Invalid credentials" });
-
-//     const match = await user.comparePassword(password);
-//     if (!match) return res.status(401).json({ message: "Invalid credentials" });
-
-//     const token = jwt.sign(
-//       { id: user._id.toString(), role: user.role, tenantId: user.tenantId },
-//       jwtConfig.secret,
-//       { expiresIn: jwtConfig.expiresIn },
-//     );
-
-//     res.json({
-//       user: {
-//         id: user._id,
-//         email: user.email,
-//         username: user.username,
-//         firstName: user.firstName,
-//         lastName: user.lastName,
-//         role: user.role,
-//         companyName: user.companyName,
-//         subscriptionPlan: user.subscriptionPlan,
-//         tenantId: user.tenantId,
-//       },
-//       token,
-//     });
-//   } catch (err) {
-//     logger.error("Login error", err);
-//     next(err);
-//   }
-// };
 
 exports.login = async (req, res, next) => {
   try {
@@ -272,120 +225,19 @@ exports.verifyToken = async (req, res, next) => {
   }
 };
 
-// // --- REGISTER ---
-// exports.register = async (req, res, next) => {
-//   try {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(422).json({ errors: errors.array() });
-//     }
+exports.getUser = async (req, res) => {
+  try {
+    const user = await User.find({
+      tenantId: req.tenantId, // numeric tenantId
+    }).select("-password"); // exclude password
 
-//     const { email, password, firstName, lastName, role, companyName } =
-//       req.body;
+    if (!user) return res.status(404).json({ message: "User not found" });
 
-//     if (!companyName) {
-//       return res
-//         .status(400)
-//         .json({ message: "Company name (tenantId) is required" });
-//     }
-
-//     const exists = await User.findOne({ email });
-//     if (exists) {
-//       return res.status(409).json({ message: "Email already in use" });
-//     }
-
-//     const tenantId = companyName.trim();
-
-//     const user = new User({
-//       email,
-//       password, // hashed in model pre-save hook
-//       firstName,
-//       lastName,
-//       role: role || "user",
-//       tenantId,
-//       companyName: tenantId,
-//     });
-
-//     await user.save();
-
-//     const token = jwt.sign(
-//       { id: user._id.toString(), role: user.role, tenantId: user.tenantId },
-//       jwtConfig.secret,
-//       { expiresIn: jwtConfig.expiresIn },
-//     );
-
-//     res.status(201).json({
-//       user: {
-//         id: user._id,
-//         email: user.email,
-//         firstName: user.firstName,
-//         lastName: user.lastName,
-//         role: user.role,
-//         tenantId: user.tenantId,
-//       },
-//       token,
-//     });
-//   } catch (err) {
-//     logger.error("Register error", err);
-//     next(err);
-//   }
-// };
-
-// // --- LOGIN ---
-// exports.login = async (req, res, next) => {
-//   try {
-//     const errors = validationResult(req);
-//     if (!errors.isEmpty()) {
-//       return res.status(422).json({ errors: errors.array() });
-//     }
-
-//     const { email, password } = req.body;
-//     const user = await User.findOne({ email });
-//     if (!user) return res.status(401).json({ message: "Invalid credentials" });
-
-//     const match = await user.comparePassword(password);
-//     if (!match) return res.status(401).json({ message: "Invalid credentials" });
-
-//     const token = jwt.sign(
-//       { id: user._id.toString(), role: user.role, tenantId: user.tenantId },
-//       jwtConfig.secret,
-//       { expiresIn: jwtConfig.expiresIn },
-//     );
-
-//     res.json({
-//       user: {
-//         id: user._id,
-//         email: user.email,
-//         firstName: user.firstName,
-//         lastName: user.lastName,
-//         role: user.role,
-//         tenantId: user.tenantId,
-//       },
-//       token,
-//     });
-//   } catch (err) {
-//     logger.error("Login error", err);
-//     next(err);
-//   }
-// };
-
-// // --- VERIFY TOKEN ---
-// exports.verifyToken = async (req, res, next) => {
-//   try {
-//     const authHeader = req.headers["authorization"];
-//     if (!authHeader) {
-//       return res.status(401).json({ message: "Authorization header missing" });
-//     }
-
-//     const token = authHeader.split(" ")[1];
-//     if (!token) {
-//       return res.status(401).json({ message: "Token missing" });
-//     }
-
-//     const decoded = jwt.verify(token, jwtConfig.secret);
-//     res.json({ success: true, decoded });
-//   } catch (err) {
-//     logger.error("Token verification error", err);
-//     res.status(401).json({ message: "Invalid or expired token" });
-//   }
-// };
+    res.json({
+      success: true,
+      user,
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
