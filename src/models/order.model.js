@@ -5,10 +5,9 @@ const Counter = require("./counter.model");
 
 const OrderSchema = new mongoose.Schema(
   {
-    orderId: { type: Number, unique: true }, // custom auto-increment ID
+    orderId: { type: Number, unique: true, required: true }, // custom auto-increment ID
     sectorId: {
       type: Number,
-      ref: "Sector",
       required: true,
     },
     items: [
@@ -33,7 +32,6 @@ const OrderSchema = new mongoose.Schema(
     },
     tenantId: {
       type: Number,
-      ref: "Tenant",
       required: true,
       index: true,
     },

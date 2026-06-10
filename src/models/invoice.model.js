@@ -6,17 +6,14 @@ const InvoiceSchema = new mongoose.Schema(
     invoiceId: { type: Number, unique: true },
     orderId: {
       type: Number,
-      ref: "Order",
       required: true,
     },
     tenantId: {
       type: Number,
-      ref: "Tenant",
       required: true,
     },
     sectorId: {
       type: Number,
-      ref: "Sector",
       required: true,
     },
     deliveryType: {

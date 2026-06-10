@@ -12,6 +12,6 @@ router.post(
 );
 
 // GET /invoices
-router.get("/users", tenantMiddleware, invoiceController.getInvoices);
+router.get("/", requireAuth, tenantMiddleware, invoiceController.getInvoices);
 
 module.exports = router;

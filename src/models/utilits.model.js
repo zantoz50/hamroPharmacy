@@ -16,7 +16,6 @@ const sectorSchema = new mongoose.Schema(
     },
     tenantId: {
       type: Number,
-      ref: "Tenant",
       required: false,
     },
   },
@@ -41,12 +40,10 @@ const categorySchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     sectorId: {
       type: Number,
-      ref: "Sector",
       required: true,
     },
     tenantId: {
       type: Number,
-      ref: "Tenant",
       required: true,
     },
     isActive: {

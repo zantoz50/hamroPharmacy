@@ -12,24 +12,33 @@ exports.createInvoice = async (req, res) => {
       paymentStatus,
     } = req.body;
 
-    // Find order
+    // Validate required fields
+    if (!orderId || !sectorId || !deliveryType || !totalAmount) {
+      return res.status(400).json({
+        message:
+          "Missing required fields: orderId, sectorId, deliveryType, totalAmount",
+      });
+    }
+
+    // Find order to verify it exists
     const order = await Order.findOne({
-      invoiceId: req.invoiceId,
+      orderId: orderId,
       tenantId: req.tenantId,
-    }).populate("sectorId");
+    });
 
     if (!order) {
       return res.status(404).json({ message: "Order not found" });
     }
 
-    // Create invoice from order
+    // Create invoice using provided values
     const invoice = new Invoice({
-      orderId: order.orderId,
-      tenantId: order.tenantId,
-      sectorId: order.sectorId,
-      deliveryType: order.deliveryType,
-      totalAmount: order.totalPrice,
-      paymentStatus: order.paymentStatus,
+      orderId,
+      tenantId: req.tenantId,
+      sectorId,
+      deliveryType,
+      invoiceDate: invoiceDate || new Date(),
+      totalAmount: parseFloat(totalAmount),
+      paymentStatus: paymentStatus || "unpaid",
     });
 
     await invoice.save();
@@ -48,9 +57,9 @@ exports.createInvoice = async (req, res) => {
 
 exports.getInvoices = async (req, res) => {
   try {
-    const invoices = await Invoice.find({ tenantId: req.tenantId })
-      .populate("orderId")
-      .populate("sectorId");
+    const invoices = await Invoice.find({ tenantId: req.tenantId }).populate(
+      "orderId",
+    );
 
     res.status(200).json(invoices);
   } catch (error) {
