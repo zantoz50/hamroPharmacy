@@ -5,7 +5,7 @@ const sectorSchema = new mongoose.Schema(
     sectorId: { type: Number, unique: true }, // custom ID
     name: {
       type: String,
-      enum: ["restaurant", "cafeteria", "mart"],
+      enum: ["Restaurant", "Cafeteria", "Mart"],
       required: true,
       unique: true,
     },
@@ -13,11 +13,6 @@ const sectorSchema = new mongoose.Schema(
     isActive: {
       type: Boolean,
       default: false,
-    },
-    tenantId: {
-      type: Number,
-      ref: "Tenant",
-      required: false,
     },
   },
   { timestamps: true },
@@ -34,6 +29,17 @@ sectorSchema.pre("save", async function (next) {
   }
   next();
 });
+// sectorSchema.index({ tenantId: 1, name: 1 }, { unique: true });
+sectorSchema.statics.ensureDefaults = async function () {
+  const count = await this.countDocuments();
+  if (count === 0) {
+    await this.insertMany([
+      { sectorId: 1, name: "restaurant", description: "restaurant sector" },
+      { sectorId: 2, name: "cafeteria", description: "cafeteria sector" },
+      { sectorId: 3, name: "mart", description: "mart sector" },
+    ]);
+  }
+};
 
 const categorySchema = new mongoose.Schema(
   {
@@ -41,12 +47,10 @@ const categorySchema = new mongoose.Schema(
     name: { type: String, required: true, trim: true },
     sectorId: {
       type: Number,
-      ref: "Sector",
       required: true,
     },
     tenantId: {
       type: Number,
-      ref: "Tenant",
       required: true,
     },
     isActive: {
@@ -70,6 +74,6 @@ categorySchema.pre("save", async function (next) {
   next();
 });
 
-const Sector = (module.exports = mongoose.model("Sector", sectorSchema));
-const Category = (module.exports = mongoose.model("Category", categorySchema));
+const Sector = mongoose.model("Sector", sectorSchema);
+const Category = mongoose.model("Category", categorySchema);
 module.exports = { Sector, Category };

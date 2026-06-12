@@ -25,9 +25,7 @@ router.post(
   tenantMiddleware,
   [
     check("name").notEmpty().withMessage("Item name required"),
-    check("sector")
-      .isIn(["restaurant", "cafeteria", "mart"])
-      .withMessage("Valid sector required"),
+    check("sectorId").isNumeric().withMessage("Valid sector ID required"),
     check("category").notEmpty().withMessage("Category required"),
     check("price").isNumeric().withMessage("Price must be numeric"),
     check("stock").isNumeric().withMessage("Stock must be numeric"),

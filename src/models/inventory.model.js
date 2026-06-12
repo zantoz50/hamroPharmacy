@@ -13,9 +13,8 @@ const InventoryItemSchema = new mongoose.Schema(
       required: true,
       trim: true,
     },
-    sector: {
-      type: String,
-      enum: ["restaurant", "cafeteria", "mart"],
+    sectorId: {
+      type: Number,
       required: true,
     },
     category: {

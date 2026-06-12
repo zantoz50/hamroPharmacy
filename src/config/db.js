@@ -2,7 +2,7 @@
 
 const mongoose = require("mongoose");
 const logger = require("../utils/logger");
-
+const seedDefaultSectors = require("./seedSector");
 const connectDB = async () => {
   const {
     MONGO_URI,
@@ -23,6 +23,10 @@ const connectDB = async () => {
       useUnifiedTopology: true,
     });
 
+    mongoose.connection.on("connected", async () => {
+      logger.info(`Mongoose connected to ${uri}`);
+      await seedDefaultSectors(); // ✅ seed defaults once
+    });
     mongoose.connection.on("connected", () => {
       logger.info(`Mongoose connected to ${uri}`);
     });
