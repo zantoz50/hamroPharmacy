@@ -68,18 +68,6 @@ exports.register = async (req, res, next) => {
 
     await user.save();
 
-    // Create Audit Log for corporate activation
-    // const newLog = new AuditLog({
-    //   timestamp: new Date().toISOString(),
-    //   sector: subscriptionPlan === "all" ? "global" : subscriptionPlan,
-    //   userId: user.email,
-    //   role: user.role,
-    //   action: "SUBSCRIBED_ACCOUNT_CREATED",
-    //   details: `Registered account ${user.email} for ${companyName} with '${subscriptionPlan.toUpperCase()}' license plan.`,
-    //   tenantId: user.companyName,
-    // });
-    // await newLog.save();
-
     const token = jwt.sign(
       { id: user._id.toString(), role: user.role, tenantId: user.tenantId },
       jwtConfig.secret,

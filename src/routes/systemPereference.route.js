@@ -25,8 +25,8 @@ const upload = multer({ storage });
  *   description: Manage corporate system preferences
  */
 
-router.get("/", controller.getPreferences);
-router.put("/", controller.updatePreferences);
+router.get("/", requireAuth, tenantMiddleware, controller.getPreferences);
+router.put("/", requireAuth, tenantMiddleware, controller.updatePreferences);
 
 // Upload company logo
 router.post("/logo", upload.single("logo"), controller.uploadLogo);

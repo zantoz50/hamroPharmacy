@@ -74,34 +74,68 @@ exports.createTenantAdmin = async (req, res) => {
     const sectorNames = subscriptionPlan.split(","); // e.g. "restaurant,cafeteria"
     const sectors = await Promise.all(
       sectorNames.map(async (name, index) => {
-        const sector = new Sector({
-          sectorId: index + 1,
-          name,
-          description: `${name} sector`,
+        const capitalizedName = capitalizeFirst(name);
+
+        let sector = await Sector.findOne({
           tenantId: tenant.tenantId,
+          name: capitalizedName,
         });
-        return sector.save();
+
+        if (!sector) {
+          sector = new Sector({
+            sectorId: index + 1,
+            name: capitalizedName,
+            description: `${capitalizedName} sector`,
+            tenantId: tenant.tenantId,
+          });
+          await sector.save();
+        }
+
+        await SystemPreference.updateOne(
+          { tenantId: tenant.tenantId },
+          {
+            $addToSet: {
+              sectors: {
+                sectorId: index + 1,
+                name: capitalizedName,
+                description: `${capitalizedName} sector`,
+                isActive: true,
+              },
+            },
+          },
+        );
+
+        return sector;
       }),
     );
 
-    // 3. Initialize default preferences
-    const prefs = new SystemPreference({
+    const existingPrefs = await SystemPreference.findOne({
       tenantId: tenant.tenantId,
-      companyName: tenant.companyName,
-      baseCurrency: "INR",
-      systemLanguage: "English",
-      rewardMatrix: [
-        { role: "Admin", multiplier: 2 },
-        { role: "Customer", multiplier: 1 },
-      ],
-      sectorLoyaltySettings: [], //{ sector: "restaurant", earnWeight: 1.5 }
-      activeOffers: [], //{ description: "Summer Sale", discountPercent: 20 }
-      promoCampaigns: [],
-      loyaltyLedgers: [], //{ memberName: "John Doe", points: 100 }
-      sectors: subscriptionPlan,
-      categories: [],
     });
-    await prefs.save();
+    if (!existingPrefs) {
+      const prefs = new SystemPreference({
+        tenantId: tenant.tenantId,
+        companyName: tenant.companyName,
+        baseCurrency: "INR",
+        systemLanguage: "English",
+        rewardMatrix: [
+          { role: "Admin", multiplier: 2 },
+          { role: "Customer", multiplier: 1 },
+        ],
+        sectorLoyaltySettings: [],
+        activeOffers: [],
+        promoCampaigns: [],
+        loyaltyLedgers: [],
+        sectors: sectorNames.map((name, index) => ({
+          sectorId: index + 1,
+          name: capitalizeFirst(name),
+          description: `${capitalizeFirst(name)} sector`,
+          isActive: true,
+        })), // ✅ now works
+        categories: [],
+      });
+      await prefs.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -119,3 +153,7 @@ exports.createTenantAdmin = async (req, res) => {
     res.status(500).json({ error: err.message });
   }
 };
+
+function capitalizeFirst(str) {
+  return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+}

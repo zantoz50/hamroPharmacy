@@ -3,33 +3,54 @@
 const SystemPreference = require("../models/systemPreference.model");
 const { Sector, Category } = require("../models/utilits.model");
 // Get system preferences
+
+// ✅ Get system preferences for the tenant from middleware
 exports.getPreferences = async (req, res) => {
   try {
-    const prefs = await SystemPreference.findOne({ tenantId: req.tenantId });
+    const tenantId = req.tenantId; // injected by tenantMiddleware
+    if (!tenantId) {
+      return res.status(400).json({ message: "Tenant ID missing" });
+    }
+
+    const prefs = await SystemPreference.findOne({ tenantId });
     res.status(200).json(prefs || {});
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error fetching preferences", error: error.message });
+    res.status(500).json({
+      message: "Error fetching preferences",
+      error: error.message,
+    });
   }
 };
 
-// Update system preferences
+// ✅ Update system preferences for the tenant
 exports.updatePreferences = async (req, res) => {
   try {
+    const tenantId = req.tenantId; // injected by tenantMiddleware
+    if (!tenantId) {
+      return res.status(400).json({ message: "Tenant ID missing" });
+    }
+
     const updates = req.body;
+
     const prefs = await SystemPreference.findOneAndUpdate(
-      { tenantId: req.tenantId },
-      updates,
-      { new: true, upsert: true },
+      { tenantId },
+      { $set: updates }, // ensure only provided fields are updated
+      { new: true, upsert: false }, // do not auto-create if tenant doesn't exist
     );
-    res
-      .status(200)
-      .json({ message: "Preferences updated successfully", prefs });
+
+    if (!prefs) {
+      return res.status(404).json({ message: "Preferences not found" });
+    }
+
+    res.status(200).json({
+      message: "Preferences updated successfully",
+      prefs,
+    });
   } catch (error) {
-    res
-      .status(500)
-      .json({ message: "Error updating preferences", error: error.message });
+    res.status(500).json({
+      message: "Error updating preferences",
+      error: error.message,
+    });
   }
 };
 
@@ -222,6 +243,7 @@ exports.getCategoriesBySectorId = async (req, res) => {
     res.status(200).json(
       categories.map((cat) => ({
         id: cat._id,
+        categoryId: cat.categoryId,
         name: cat.name,
       })),
     );

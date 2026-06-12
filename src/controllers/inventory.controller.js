@@ -54,7 +54,7 @@ exports.addInventory = async (req, res) => {
   try {
     const {
       name,
-      sector,
+      sectorId,
       category,
       price,
       cost,
@@ -68,7 +68,7 @@ exports.addInventory = async (req, res) => {
     const item = new Inventory({
       tenantId: req.tenantId,
       name,
-      sector,
+      sectorId: Number(sectorId),
       category,
       price: Number(price), // ensure numeric
       cost: Number(cost),
