@@ -1,12 +1,12 @@
 "use strict";
 
 const User = require("../models/user.model");
-const Tenant = require("../models/tanent.model");
+const Tenant = require("../models/tenant.model");
 const SystemPreference = require("../models/systemPreference.model");
 const { Sector } = require("../models/utilits.model");
 
 // GET all tenants (distinct tenantId values)
-exports.getTenants = async (req, res) => {
+const getTenants = async (req, res) => {
   try {
     const tenants = await User.distinct("tenantId");
     res.json({ tenants });
@@ -16,7 +16,7 @@ exports.getTenants = async (req, res) => {
 };
 
 // GET users by tenantId
-exports.getTenantUsers = async (req, res) => {
+const getTenantUsers = async (req, res) => {
   try {
     const { tenantId } = req.params;
     const users = await User.find({ tenantId });
@@ -27,7 +27,7 @@ exports.getTenantUsers = async (req, res) => {
 };
 
 // CREATE a new tenant admin user
-exports.createTenantAdmin = async (req, res) => {
+const createTenantAdmin = async (req, res) => {
   try {
     const {
       email,
@@ -69,73 +69,11 @@ exports.createTenantAdmin = async (req, res) => {
     });
 
     await admin.save();
-
-    // Auto‑create sectors from subscription plan
-    const sectorNames = subscriptionPlan.split(","); // e.g. "restaurant,cafeteria"
-    const sectors = await Promise.all(
-      sectorNames.map(async (name, index) => {
-        const capitalizedName = capitalizeFirst(name);
-
-        let sector = await Sector.findOne({
-          tenantId: tenant.tenantId,
-          name: capitalizedName,
-        });
-
-        if (!sector) {
-          sector = new Sector({
-            sectorId: index + 1,
-            name: capitalizedName,
-            description: `${capitalizedName} sector`,
-            tenantId: tenant.tenantId,
-          });
-          await sector.save();
-        }
-
-        await SystemPreference.updateOne(
-          { tenantId: tenant.tenantId },
-          {
-            $addToSet: {
-              sectors: {
-                sectorId: index + 1,
-                name: capitalizedName,
-                description: `${capitalizedName} sector`,
-                isActive: true,
-              },
-            },
-          },
-        );
-
-        return sector;
-      }),
+    await ensureTenantSectorPreferences(
+      tenant.tenantId,
+      tenant.companyName,
+      subscriptionPlan,
     );
-
-    const existingPrefs = await SystemPreference.findOne({
-      tenantId: tenant.tenantId,
-    });
-    if (!existingPrefs) {
-      const prefs = new SystemPreference({
-        tenantId: tenant.tenantId,
-        companyName: tenant.companyName,
-        baseCurrency: "INR",
-        systemLanguage: "English",
-        rewardMatrix: [
-          { role: "Admin", multiplier: 2 },
-          { role: "Customer", multiplier: 1 },
-        ],
-        sectorLoyaltySettings: [],
-        activeOffers: [],
-        promoCampaigns: [],
-        loyaltyLedgers: [],
-        sectors: sectorNames.map((name, index) => ({
-          sectorId: index + 1,
-          name: capitalizeFirst(name),
-          description: `${capitalizeFirst(name)} sector`,
-          isActive: true,
-        })), // ✅ now works
-        categories: [],
-      });
-      await prefs.save();
-    }
 
     res.status(201).json({
       success: true,
@@ -157,3 +95,96 @@ exports.createTenantAdmin = async (req, res) => {
 function capitalizeFirst(str) {
   return str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
 }
+
+const PLAN_SECTORS = {
+  restaurant: ["Restaurant"],
+  cafeteria: ["Cafeteria"],
+  mart: ["Mart"],
+  all: ["Restaurant", "Cafeteria", "Mart"],
+};
+
+function normalizePlan(plan) {
+  if (!plan || typeof plan !== "string") return "all";
+  return plan.trim().toLowerCase();
+}
+
+function buildSectorNamesForPlan(subscriptionPlan) {
+  const planKey = normalizePlan(subscriptionPlan);
+  return PLAN_SECTORS[planKey] || PLAN_SECTORS.all;
+}
+
+async function ensureTenantSectorPreferences(
+  tenantId,
+  companyName,
+  subscriptionPlan,
+) {
+  const DEFAULT_SECTORS = [
+    {
+      sectorId: 1,
+      name: "Restaurant",
+      description: "Restaurant sector",
+      isActive: true,
+    },
+    {
+      sectorId: 2,
+      name: "Cafeteria",
+      description: "Cafeteria sector",
+      isActive: true,
+    },
+    { sectorId: 3, name: "Mart", description: "Mart sector", isActive: true },
+  ];
+
+  // ✅ Ensure global sectors exist (insert or update)
+  for (const def of DEFAULT_SECTORS) {
+    await Sector.updateOne(
+      { name: def.name }, // check by name
+      { $setOnInsert: def }, // insert if missing
+      { upsert: true },
+    );
+  }
+  const sectorNames = buildSectorNamesForPlan(subscriptionPlan);
+
+  // Fetch global sectors by name
+  const globalSectors = await Sector.find({ name: { $in: sectorNames } });
+
+  const prefSectors = globalSectors.map((sector) => ({
+    sectorId: sector.sectorId,
+    name: sector.name,
+    description: sector.description,
+    isActive: sector.isActive,
+  }));
+
+  const existingPrefs = await SystemPreference.findOne({ tenantId });
+
+  if (!existingPrefs) {
+    const prefs = new SystemPreference({
+      tenantId,
+      companyName,
+      baseCurrency: "NPR",
+      systemLanguage: "English",
+      rewardMatrix: [
+        { role: "Admin", multiplier: 2 },
+        { role: "Customer", multiplier: 1 },
+      ],
+      sectorLoyaltySettings: [],
+      activeOffers: [],
+      promoCampaigns: [],
+      loyaltyLedgers: [],
+      sectors: prefSectors,
+      categories: [],
+    });
+    await prefs.save();
+  } else {
+    await SystemPreference.updateOne(
+      { tenantId },
+      { $addToSet: { sectors: { $each: prefSectors } } },
+    );
+  }
+}
+
+module.exports = {
+  getTenants,
+  getTenantUsers,
+  createTenantAdmin,
+  ensureTenantSectorPreferences,
+};
