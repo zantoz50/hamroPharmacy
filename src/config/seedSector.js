@@ -8,11 +8,28 @@ const DEFAULT_SECTORS = [
 ];
 
 async function seedDefaultSectors() {
-  for (const sector of DEFAULT_SECTORS) {
-    const exists = await Sector.findOne({ name: sector.name });
-    if (!exists) {
-      await Sector.create(sector);
+  for (const def of DEFAULT_SECTORS) {
+    // Check if sector exists by name
+    const existing = await Sector.findOne({ name: def.name });
+
+    if (!existing) {
+      // Insert if missing
+      await new Sector(def).save();
+    } else if (existing.sectorId !== def.sectorId) {
+      // Update sectorId if mismatched
+      await Sector.updateOne(
+        { _id: existing._id },
+        {
+          $set: {
+            sectorId: def.sectorId,
+            description: def.description,
+            isActive: true,
+          },
+        },
+      );
     }
   }
+
+  console.log("✅ Default sectors ensured/updated");
 }
 module.exports = seedDefaultSectors;

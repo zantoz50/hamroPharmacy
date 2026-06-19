@@ -23,6 +23,13 @@ const InvoiceSchema = new mongoose.Schema(
     },
     invoiceDate: { type: Date, default: Date.now },
     totalAmount: { type: Number, required: true },
+    paymentType: {
+      type: String,
+      enum: ["cash", "credit", "qr"],
+      default: "cash",
+      // required: true,
+    },
+    creditAmount: { type: Number, default: 0 }, // if paymentType = credit
     paymentStatus: {
       type: String,
       enum: ["unpaid", "paid", "refunded"],

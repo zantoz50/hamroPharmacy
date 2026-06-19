@@ -1,4 +1,5 @@
 const Invoice = require("../models/invoice.model");
+const Customer = require("../models/customer.model");
 const Order = require("../models/order.model");
 
 exports.createInvoice = async (req, res) => {
@@ -9,6 +10,7 @@ exports.createInvoice = async (req, res) => {
       deliveryType,
       invoiceDate,
       totalAmount,
+      paymentType,
       paymentStatus,
     } = req.body;
 
@@ -38,10 +40,20 @@ exports.createInvoice = async (req, res) => {
       deliveryType,
       invoiceDate: invoiceDate || new Date(),
       totalAmount: parseFloat(totalAmount),
+      paymentType,
+      creditAmount: paymentType === "credit" ? totalAmount : 0,
+      status: "pending",
       paymentStatus: paymentStatus || "unpaid",
     });
 
     await invoice.save();
+
+    // // Update customer credit balance if credit
+    // if (paymentType === "credit") {
+    //   await Customer.findByIdAndUpdate(customerId, {
+    //     $inc: { creditBalance: totalAmount },
+    //   });
+    // }
 
     res.status(201).json({
       message: "Invoice created successfully",

@@ -13,6 +13,7 @@ const OrderSchema = new mongoose.Schema(
     items: [
       {
         inventoryId: { type: String, required: true },
+        sectorId: { type: Number, required: true },
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
         priceOnOrder: { type: Number, required: true },
