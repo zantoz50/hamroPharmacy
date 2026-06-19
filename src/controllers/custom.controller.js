@@ -11,9 +11,10 @@ exports.addCustomer = async (req, res) => {
       lastName,
       phoneNumber,
       companyName,
+      address,
     } = req.body;
 
-    const tenant = await Tenant.findOne({ companyName: companyName.trim() });
+    const tenant = await Tenant.findOne({ tenantId: req.tenantId });
     if (!tenant) return res.status(404).json({ error: "Company not found" });
 
     const exists = await Customer.findOne({ $or: [{ email }, { username }] });
@@ -30,7 +31,8 @@ exports.addCustomer = async (req, res) => {
       lastName,
       phoneNumber,
       companyName: tenant.companyName,
-      tenantId: tenant._id,
+      address,
+      tenantId: tenant.tenantId,
     });
 
     await customer.save();
