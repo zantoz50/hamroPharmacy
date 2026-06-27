@@ -19,10 +19,33 @@ const app = express();
 app.set("trust proxy", 1);
 
 // Security
-app.use(helmet());
+app.use(
+  helmet({
+    referrerPolicy: { policy: "origin-when-cross-origin" },
+  }),
+);
+
+// Or set manually
+app.use((req, res, next) => {
+  res.setHeader("Referrer-Policy", "origin-when-cross-origin");
+  next();
+});
+// app.use(helmet());
 
 // CORS
 app.use(cors({ origin: process.env.CORS_ORIGIN || "*" }));
+
+// Allow all origins (development)
+// app.use(cors());
+
+// Or restrict to specific frontend origin
+// app.use(
+//   cors({
+//     origin: "http://localhost:5173", // your React/Vue/Angular frontend
+//     methods: ["GET", "POST", "PUT", "DELETE"],
+//     credentials: true,
+//   }),
+// );
 
 // Parsers
 app.use(express.json({ limit: "5mb" }));

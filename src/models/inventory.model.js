@@ -8,14 +8,14 @@ const InventoryItemSchema = new mongoose.Schema(
       required: true,
       index: true,
     },
+    sectorId: {
+      type: Number,
+      required: true,
+    },
     name: {
       type: String,
       required: true,
       trim: true,
-    },
-    sectorId: {
-      type: Number,
-      required: true,
     },
     category: {
       type: String,

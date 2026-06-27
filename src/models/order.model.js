@@ -12,11 +12,15 @@ const OrderSchema = new mongoose.Schema(
     },
     items: [
       {
-        inventoryId: { type: String, required: true },
+        inventoryId: { type: Number, required: true },
         sectorId: { type: Number, required: true },
         name: { type: String, required: true },
         quantity: { type: Number, required: true },
-        priceOnOrder: { type: Number, required: true },
+        sku: { type: String },
+        originalPrice: { type: Number, required: true },
+        stock: { type: Number },
+        unitPoints: { type: Number },
+        totalPrice: { type: Number, required: true },
       },
     ],
     totalPrice: { type: Number, required: true },
@@ -25,11 +29,19 @@ const OrderSchema = new mongoose.Schema(
       enum: ["pending", "preparing", "ready", "completed", "cancelled"],
       default: "pending",
     },
+    customerId: {
+      type: Number,
+      ref: "Customer",
+      default: null,
+    },
     customerName: { type: String, default: "Guest Customer" },
     deliveryType: {
       type: String,
       enum: ["dine-in", "takeaway", "delivery"],
       required: true,
+    },
+    tableNo: {
+      type: String,
     },
     tenantId: {
       type: Number,
