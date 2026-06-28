@@ -142,8 +142,17 @@ async function ensureTenantSectorPreferences(
       { upsert: true },
     );
   }
-  const sectorNames = buildSectorNamesForPlan(subscriptionPlan);
-
+  // const sectorNames = buildSectorNamesForPlan(subscriptionPlan);
+  // ✅ Normalize subscriptionPlan
+  let sectorNames = [];
+  if (subscriptionPlan.includes("all")) {
+    sectorNames = DEFAULT_SECTORS.map((s) => s.name);
+  } else {
+    // Capitalize first letter to match Sector names
+    sectorNames = subscriptionPlan.map(
+      (p) => p.charAt(0).toUpperCase() + p.slice(1),
+    );
+  }
   // Fetch global sectors by name
   const globalSectors = await Sector.find({ name: { $in: sectorNames } });
 
