@@ -71,12 +71,13 @@ router.post(
     check("password").isLength({ min: 6 }).withMessage("Password min length 6"),
     check("companyName").notEmpty().withMessage("Company name required"),
     check("subscriptionPlan")
-      .notEmpty()
-      .withMessage("Subscription plan required")
-      .isIn(["restaurant", "cafeteria", "mart", "all"])
-      .withMessage(
-        "Subscription plan must be restaurant, cafeteria, mart, or all",
-      ),
+      .isArray({ min: 1 })
+      .withMessage("Subscription plan must be an array")
+      .custom((plans) => {
+        const allowed = ["restaurant", "cafeteria", "mart", "all"];
+        return plans.every((p) => allowed.includes(p));
+      })
+      .withMessage("Invalid subscription plan(s)"),
   ],
   validateRequest,
   controller.register,

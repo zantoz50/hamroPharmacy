@@ -5,7 +5,11 @@ const tenantSchema = new mongoose.Schema(
   {
     tenantId: { type: Number, unique: true, index: true }, // auto-increment field
     companyName: { type: String, required: true, unique: true, trim: true },
-    subscriptionPlan: { type: String, required: true }, // e.g. "restaurant", "cafeteria", "mart", "all"
+    subscriptionPlan: {
+      type: [String], // array of strings
+      required: true,
+      enum: ["restaurant", "cafeteria", "mart", "all"], // enforce allowed values
+    },
     createdAt: { type: Date, default: Date.now },
   },
   { timestamps: true },

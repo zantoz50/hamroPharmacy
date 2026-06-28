@@ -87,9 +87,11 @@ const UserSchema = new mongoose.Schema(
 
       required: true,
     },
-
-    // New field for subscription plan
-    subscriptionPlan: { type: String, required: true }, // e.g. "restaurant", "cafeteria", "mart", "all"
+    subscriptionPlan: {
+      type: [String], // array of strings
+      required: true,
+      enum: ["restaurant", "cafeteria", "mart", "all"], // enforce allowed values
+    },
   },
   { timestamps: true },
 );
