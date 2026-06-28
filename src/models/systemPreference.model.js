@@ -46,7 +46,7 @@ const systemPreferenceSchema = new mongoose.Schema(
     loyaltyLedgers: [loyaltyLedgerSchema],
     sectors: [
       {
-        sectorId: { type: Number, requied: true, unique: true },
+        sectorId: { type: Number, required: true, unique: true },
         name: { type: String, required: true, trim: true },
         description: { type: String },
         isActive: { type: Boolean, default: true },

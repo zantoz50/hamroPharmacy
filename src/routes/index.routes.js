@@ -11,9 +11,8 @@ const orderRoutes = require("./order.routes");
 const systemPreferenceRoutes = require("./systemPereference.route");
 const utilityRoutes = require("./utility.routes");
 const invoiceRoutes = require("./invoice.route");
-// const patientRoutes = require("./patient.routes");
-// const diseaseRoutes = require("./disease.routes");
-// const locationRoutes = require("./location.routes");
+const customerRoutes = require("./customer.routes");
+const notificationRoutes = require("./notification.routes");
 
 router.use("/auth", authRoutes);
 router.use("/tanents", tanentRoutes);
@@ -22,9 +21,8 @@ router.use("/raw-materials", rawMaterialRoutes);
 router.use("/orders", orderRoutes);
 router.use("/system-preferences", systemPreferenceRoutes);
 router.use("/utilities", utilityRoutes);
-// router.use("/patient", patientRoutes);
-// router.use("/disease", diseaseRoutes);
-// router.use("/location", locationRoutes);
+router.use("/customers", customerRoutes);
 router.use("/invoices", invoiceRoutes);
+router.use("/notifications", notificationRoutes);
 
 module.exports = router;

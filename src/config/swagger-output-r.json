@@ -2075,6 +2075,11 @@
             "name": "authorization",
             "in": "header",
             "type": "string"
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -2114,13 +2119,7 @@
                 "masterInvoiceId": {
                   "example": "any"
                 },
-                "orderId": {
-                  "example": "any"
-                },
                 "paymentStatus": {
-                  "example": "any"
-                },
-                "customerId": {
                   "example": "any"
                 }
               }
@@ -2139,92 +2138,6 @@
           },
           "404": {
             "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/notifications/": {
-      "post": {
-        "description": "",
-        "responses": {
-          "201": {
-            "description": "Created"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      },
-      "get": {
-        "description": "",
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      }
-    },
-    "/notifications/{id}": {
-      "get": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "404": {
-            "description": "Not Found"
-          },
-          "500": {
-            "description": "Internal Server Error"
-          }
-        }
-      },
-      "put": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
-          },
-          "400": {
-            "description": "Bad Request"
-          }
-        }
-      },
-      "delete": {
-        "description": "",
-        "parameters": [
-          {
-            "name": "id",
-            "in": "path",
-            "required": true,
-            "type": "string"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK"
           },
           "500": {
             "description": "Internal Server Error"
@@ -2314,6 +2227,11 @@
             "name": "authorization",
             "in": "header",
             "type": "string"
+          },
+          {
+            "name": "tenantId",
+            "in": "query",
+            "type": "string"
           }
         ],
         "responses": {
@@ -2353,13 +2271,7 @@
                 "masterInvoiceId": {
                   "example": "any"
                 },
-                "orderId": {
-                  "example": "any"
-                },
                 "paymentStatus": {
-                  "example": "any"
-                },
-                "customerId": {
                   "example": "any"
                 }
               }

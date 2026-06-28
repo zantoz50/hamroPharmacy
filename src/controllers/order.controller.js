@@ -1,8 +1,10 @@
 "use strict";
 
 const Order = require("../models/order.model");
-const Invoice = require("../models/invoice.model");
+const { Invoice, MasterInvoice } = require("../models/invoice.model");
 const Inventory = require("../models/inventory.model");
+const invoiceController = require("./invoice.controller"); // where createMasterInvoice lives
+const Notification = require("../models/notification.model");
 // GET Orders
 exports.getOrders = async (req, res) => {
   const orders = await Order.find({ tenantId: req.tenantId });
@@ -10,42 +12,12 @@ exports.getOrders = async (req, res) => {
 };
 
 // CREATE Order
-// exports.createOrder = async (req, res) => {
-//   const { items, totalPrice, customerName, deliveryType, sectorId } = req.body;
-//   const newOrder = new Order({
-//     items,
-//     totalPrice,
-//     customerName: "Guest Coustomer",
-//     deliveryType,
-//     tenantId: req.tenantId,
-//     status: "pending",
-//     sectorId, // ✅ required field
-//     createdAt: new Date(),
-//     updatedAt: new Date(),
-//   });
-//   await newOrder.save();
-//   res.status(201).json(newOrder);
-// };
-
-// // UPDATE Order Status
-// exports.updateOrderStatus = async (req, res) => {
-//   const { id } = req.params;
-//   const { status } = req.body;
-//   const updated = await Order.findOneAndUpdate(
-//     { orderId: id, tenantId: req.tenantId },
-//     { status, updatedAt: new Date() },
-//     { new: true },
-//   );
-//   if (!updated) return res.status(404).json({ error: "Order not found" });
-//   res.json(updated);
-// };
-
 exports.createOrder = async (req, res) => {
   try {
-    const { items, totalPrice, customerName, deliveryType, sectorId } =
+    const { items, totalPrice, customerName, deliveryType, sectorId, tableNo } =
       req.body;
 
-    // Check stock for each item
+    // Stock check
     for (const item of items) {
       const inventoryItem = await Inventory.findOne({
         inventoryId: item.inventoryId,
@@ -65,18 +37,15 @@ exports.createOrder = async (req, res) => {
         });
       }
 
-      // Reduce stock
       inventoryItem.stock -= item.quantity;
-
-      // Warn if below minStock
       if (inventoryItem.stock <= inventoryItem.minStock) {
         console.warn(
           `⚠️ Stock warning: ${inventoryItem.name} is below minimum threshold`,
         );
       }
-
       await inventoryItem.save();
     }
+    // ✅ Call your external createMasterInvoice method
 
     const newOrder = new Order({
       items,
@@ -85,33 +54,38 @@ exports.createOrder = async (req, res) => {
       deliveryType,
       tenantId: req.tenantId,
       sectorId,
+      tableNo, // optional field
       status: "pending",
-      createdAt: new Date(),
-      updatedAt: new Date(),
     });
 
     await newOrder.save();
-
-    // ✅ Create invoice if order is pending
-    if (newOrder.status === "pending") {
-      const newInvoice = new Invoice({
-        orderId: newOrder.orderId,
-        tenantId: req.tenantId,
-        sectorId,
-        deliveryType,
-        totalAmount: totalPrice,
-        invoiceDate: new Date(),
-        status: "unpaid",
+    try {
+      await invoiceController.createMasterInvoice(newOrder);
+    } catch (err) {
+      // rollback tenant if preference creation fails
+      await Order.deleteOne({ orderId: newOrder.orderId });
+      return res.status(500).json({
+        message: "Failed to create Master Invoice",
+        error: err.message,
       });
-
-      await newInvoice.save();
     }
+    // 🔔 Create notification
+    await Notification.create({
+      tenantId: req.tenantId,
+      eventType: "ORDER_CREATED",
+      eventId: newOrder.orderId?.toString(),
+      data: {
+        customerId: newOrder.customerId,
+        customerName: newOrder.customerName,
+      },
+      message: `Order ${newOrder.masterInvoiceId} created!`,
+    });
+
     res.status(201).json(newOrder);
   } catch (error) {
-    res.status(500).json({
-      message: "Error creating order",
-      error: error.message,
-    });
+    res
+      .status(500)
+      .json({ message: "Error creating order", error: error.message });
   }
 };
 

@@ -3,10 +3,13 @@
 const { validationResult } = require("express-validator");
 const jwt = require("jsonwebtoken");
 const User = require("../models/user.model");
-const Tenant = require("../models/tanent.model");
+const Tenant = require("../models/tenant.model");
 const jwtConfig = require("../config/jwt.config");
 const logger = require("../utils/logger");
-const { createTenantAdmin } = require("./tenant.controller");
+const {
+  createTenantAdmin,
+  ensureTenantSectorPreferences,
+} = require("./tenant.controller");
 
 // --- REGISTER ---
 exports.register = async (req, res, next) => {
@@ -18,6 +21,7 @@ exports.register = async (req, res, next) => {
 
     const {
       email,
+      username,
       password,
       firstName,
       lastName,
@@ -32,32 +36,49 @@ exports.register = async (req, res, next) => {
         .json({ message: "Company name and subscription plan are required." });
     }
 
-    // If registering an admin, reuse tenant controller logic
-    if (role && role.toLowerCase() === "admin") {
-      return createTenantAdmin(req, res);
-    }
-
-    // Check if tenant exists
+    // --- Step 1: Ensure tenant ---
     let tenant = await Tenant.findOne({ companyName: companyName.trim() });
     if (!tenant) {
-      // Create new tenant
       tenant = new Tenant({
         companyName: companyName.trim(),
         subscriptionPlan,
       });
       await tenant.save();
+    } else if (
+      subscriptionPlan &&
+      tenant.subscriptionPlan !== subscriptionPlan
+    ) {
+      tenant.subscriptionPlan = subscriptionPlan;
+      await tenant.save();
     }
 
-    const exists = await User.findOne({ email });
+    // --- Step 2: Ensure SystemPreference ---
+    try {
+      await ensureTenantSectorPreferences(
+        tenant.tenantId,
+        tenant.companyName,
+        tenant.subscriptionPlan,
+      );
+    } catch (err) {
+      // rollback tenant if preference creation fails
+      await Tenant.deleteOne({ _id: tenant._id });
+      return res
+        .status(500)
+        .json({ message: "Failed to create preferences", error: err.message });
+    }
+
+    // --- Step 3: Ensure unique user ---
+    const exists = await User.findOne({ $or: [{ email }, { username }] });
     if (exists) {
-      return res.status(409).json({ message: "Email already in use" });
+      return res
+        .status(409)
+        .json({ message: "Email or username already in use" });
     }
-
-    const tenantId = companyName.trim();
 
     const user = new User({
-      email,
-      password, // hashed in model pre-save hook
+      email: email || null,
+      username: username || null,
+      password,
       firstName,
       lastName,
       role: role || "Corporate Executive",
@@ -66,7 +87,16 @@ exports.register = async (req, res, next) => {
       subscriptionPlan,
     });
 
-    await user.save();
+    try {
+      await user.save();
+    } catch (err) {
+      // rollback tenant + preference if user creation fails
+      await Tenant.deleteOne({ _id: tenant._id });
+      await SystemPreference.deleteOne({ tenantId: tenant.tenantId });
+      return res
+        .status(500)
+        .json({ message: "Failed to create user", error: err.message });
+    }
 
     const token = jwt.sign(
       { id: user._id.toString(), role: user.role, tenantId: user.tenantId },
@@ -78,6 +108,7 @@ exports.register = async (req, res, next) => {
       user: {
         id: user._id,
         email: user.email,
+        username: user.username,
         firstName: user.firstName,
         lastName: user.lastName,
         role: user.role,
@@ -144,10 +175,8 @@ exports.login = async (req, res, next) => {
     if (!errors.isEmpty()) {
       return res.status(422).json({ errors: errors.array() });
     }
-
-    // Treat "email" field as a generic identifier
-    const { email: identifier, password } = req.body;
-    if (!identifier || !password) {
+    const { username, password } = req.body;
+    if (!username || !password) {
       return res
         .status(400)
         .json({ message: "Identifier and password are required" });
@@ -156,8 +185,8 @@ exports.login = async (req, res, next) => {
     // Try to find user by email OR username
     const user = await User.findOne({
       $or: [
-        { email: identifier.trim().toLowerCase() },
-        { username: identifier.trim().toLowerCase() },
+        { email: username.trim().toLowerCase() },
+        { username: username.trim().toLowerCase() },
       ],
     });
 

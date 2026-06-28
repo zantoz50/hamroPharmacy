@@ -70,6 +70,13 @@ router.post(
   [
     check("password").isLength({ min: 6 }).withMessage("Password min length 6"),
     check("companyName").notEmpty().withMessage("Company name required"),
+    check("subscriptionPlan")
+      .notEmpty()
+      .withMessage("Subscription plan required")
+      .isIn(["restaurant", "cafeteria", "mart", "all"])
+      .withMessage(
+        "Subscription plan must be restaurant, cafeteria, mart, or all",
+      ),
   ],
   validateRequest,
   controller.register,
@@ -191,14 +198,11 @@ router.post(
   "/login",
   [
     check("password").exists().withMessage("Password required"),
-    // Either email or username must be provided
-    // check("email").optional().isEmail().withMessage("Valid email required"),
-    check("email")
-      .notEmpty()
+    check("username")
+      .exists()
       .withMessage("Email or username required")
       .isString()
       .withMessage("Identifier must be a string"),
-    check("username").optional().notEmpty().withMessage("Username required"),
   ],
   (req, res, next) => {
     if (!req.body.email && !req.body.username) {
