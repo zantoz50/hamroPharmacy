@@ -71,7 +71,11 @@ connectDB()
     // Attach Socket.IO to the server
     const io = new Server(server, {
       cors: {
-        origin: "http://localhost:5173", // your Vite frontend
+        // origin: "http://localhost:5173", // your Vite frontend
+        origin: [
+          "http://localhost:5173",
+          "https://assist-inventory.vercel.app",
+        ],
         methods: ["GET", "POST"],
         credentials: true,
       },
