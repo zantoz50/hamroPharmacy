@@ -13,6 +13,8 @@ const sectorSchema = new mongoose.Schema(
       type: Boolean,
       default: false,
     },
+    color: { type: String },
+    icon: { type: String },
   },
   { timestamps: true },
 );

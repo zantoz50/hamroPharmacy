@@ -217,6 +217,7 @@ exports.updateMasterInvoice = async (req, res) => {
       tenantId: req.tenantId,
       eventType: "INVOICE_UPDATED",
       eventId: masterInvoice.masterInvoiceId.toString(),
+      sectorId: sectorId,
       data: {
         paymentStatus,
         customerId: masterInvoice.customerId,

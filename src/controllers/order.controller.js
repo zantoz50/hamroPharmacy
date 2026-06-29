@@ -74,6 +74,7 @@ exports.createOrder = async (req, res) => {
       tenantId: req.tenantId,
       eventType: "ORDER_CREATED",
       eventId: newOrder.orderId?.toString(),
+      sectorId: sectorId,
       data: {
         customerId: newOrder.customerId,
         customerName: newOrder.customerName,

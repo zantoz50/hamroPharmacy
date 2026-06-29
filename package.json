@@ -9,9 +9,11 @@
     "dev:debug": "nodemon --watch src --inspect-brk src/index.js",
     "test": "jest --runInBand",
     "lint": "eslint .",
+    "seed": "node src/config/seedSector.js",
     "seed-admin": "bash scripts/seed-admin.sh",
     "swagger:generate": "node src/config/swagger.js",
     "swagger:generateautogen": "node src/config/swagger-autogen.js",
+    "prod": "npm run seed && npm run start",
     "debug": "node --inspect src/index.js"
   },
   "keywords": [
