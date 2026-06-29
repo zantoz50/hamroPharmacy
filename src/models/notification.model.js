@@ -6,6 +6,7 @@ const notificationSchema = new mongoose.Schema(
     eventId: { type: String, required: true },
     eventType: { type: String, required: true }, // e.g. ORDER_CREATED, BILLING_COMPLETED
     tenantId: { type: Number, required: true },
+    sectorId: { type: Number, required: true },
     timestamp: { type: Date, default: Date.now },
     data: { type: Object, required: true }, // flexible payload storage
     read: { type: Boolean, default: false }, // track if notification is read
