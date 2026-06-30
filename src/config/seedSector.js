@@ -79,5 +79,5 @@ async function seedDefaultSectors() {
 //     console.error("❌ Seeder failed:", err);
 //     process.exit(1);
 //   }
-})();
+//})();
 module.exports = seedDefaultSectors;
