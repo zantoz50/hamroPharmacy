@@ -118,42 +118,17 @@ async function ensureTenantSectorPreferences(
   companyName,
   subscriptionPlan,
 ) {
-  const DEFAULT_SECTORS = [
-    {
-      sectorId: 1,
-      name: "Restaurant",
-      description: "Restaurant sector",
-      isActive: true,
-    },
-    {
-      sectorId: 2,
-      name: "Cafeteria",
-      description: "Cafeteria sector",
-      isActive: true,
-    },
-    { sectorId: 3, name: "Mart", description: "Mart sector", isActive: true },
-  ];
-
-  // ✅ Ensure global sectors exist (insert or update)
-  for (const def of DEFAULT_SECTORS) {
-    await Sector.updateOne(
-      { name: def.name }, // check by name
-      { $setOnInsert: def }, // insert if missing
-      { upsert: true },
-    );
-  }
-  // const sectorNames = buildSectorNamesForPlan(subscriptionPlan);
-  // ✅ Normalize subscriptionPlan
+  // ✅ Normalize subscriptionPlan into sector names
   let sectorNames = [];
   if (subscriptionPlan.includes("all")) {
-    sectorNames = DEFAULT_SECTORS.map((s) => s.name);
+    sectorNames = ["Restaurant", "Cafeteria", "Mart"];
   } else {
-    // Capitalize first letter to match Sector names
     sectorNames = subscriptionPlan.map(
       (p) => p.charAt(0).toUpperCase() + p.slice(1),
     );
   }
-  // Fetch global sectors by name
+
+  // ✅ Fetch only the sectors relevant to the subscription
   const globalSectors = await Sector.find({ name: { $in: sectorNames } });
 
   const prefSectors = globalSectors.map((sector) => ({
@@ -161,6 +136,8 @@ async function ensureTenantSectorPreferences(
     name: sector.name,
     description: sector.description,
     isActive: sector.isActive,
+    color: sector.color,
+    icon: sector.icon,
   }));
 
   const existingPrefs = await SystemPreference.findOne({ tenantId });
