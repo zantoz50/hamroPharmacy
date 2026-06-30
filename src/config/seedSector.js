@@ -59,25 +59,25 @@ async function seedDefaultSectors() {
   console.log("✅ Default sectors ensured/updated");
 }
 
-// (async () => {
-//   try {
-//     const uri =
-//       process.env.MONGO_URI ||
-//       `mongodb://${process.env.MONGO_HOST || "localhost"}:${process.env.MONGO_PORT || "27017"}/${process.env.MONGO_DB || "inventory-plus"}`;
+(async () => {
+  try {
+    const uri =
+      process.env.MONGO_URI ||
+      `mongodb://${process.env.MONGO_HOST || "localhost"}:${process.env.MONGO_PORT || "27017"}/${process.env.MONGO_DB || "inventory-plus"}`;
 
-//     console.log("📡 Connecting to MongoDB:", uri);
-//     await mongoose.connect(uri, {
-//       useNewUrlParser: true,
-//       useUnifiedTopology: true,
-//     });
-//     console.log("✅ Connected to MongoDB");
+    console.log("📡 Connecting to MongoDB:", uri);
+    await mongoose.connect(uri, {
+      useNewUrlParser: true,
+      useUnifiedTopology: true,
+    });
+    console.log("✅ Connected to MongoDB");
 
-//     await seedDefaultSectors();
-//     await mongoose.disconnect();
-//     console.log("🔌 Disconnected from MongoDB");
-//   } catch (err) {
-//     console.error("❌ Seeder failed:", err);
-//     process.exit(1);
-//   }
-// })();
+    await seedDefaultSectors();
+    await mongoose.disconnect();
+    console.log("🔌 Disconnected from MongoDB");
+  } catch (err) {
+    console.error("❌ Seeder failed:", err);
+    process.exit(1);
+  }
+})();
 module.exports = seedDefaultSectors;
