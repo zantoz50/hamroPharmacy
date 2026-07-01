@@ -5,6 +5,23 @@ const { Sector, Category } = require("../models/utilits.model");
 // Get system preferences
 
 // ✅ Get system preferences for the tenant from middleware
+// exports.getPreferences = async (req, res) => {
+//   try {
+//     const tenantId = req.tenantId; // injected by tenantMiddleware
+//     if (!tenantId) {
+//       return res.status(400).json({ message: "Tenant ID missing" });
+//     }
+
+//     const prefs = await SystemPreference.findOne({ tenantId });
+//     res.status(200).json(prefs || {});
+//   } catch (error) {
+//     res.status(500).json({
+//       message: "Error fetching preferences",
+//       error: error.message,
+//     });
+//   }
+// };
+
 exports.getPreferences = async (req, res) => {
   try {
     const tenantId = req.tenantId; // injected by tenantMiddleware
@@ -13,7 +30,37 @@ exports.getPreferences = async (req, res) => {
     }
 
     const prefs = await SystemPreference.findOne({ tenantId });
-    res.status(200).json(prefs || {});
+    if (!prefs) {
+      return res.status(404).json({ message: "Preferences not found" });
+    }
+
+    // ✅ Normalize subscriptionPlan into sector names
+    let sectorNames = [];
+    if (prefs.subscriptionPlan?.includes("all")) {
+      sectorNames = ["Restaurant", "Cafeteria", "Mart"];
+    } else if (Array.isArray(prefs.subscriptionPlan)) {
+      sectorNames = prefs.subscriptionPlan.map(
+        (p) => p.charAt(0).toUpperCase() + p.slice(1),
+      );
+    }
+
+    // ✅ Fetch matching sectors from Sector table
+    const matchedSectors = await Sector.find({ name: { $in: sectorNames } });
+
+    // ✅ Attach sectors dynamically (not persisted)
+    const response = {
+      ...prefs.toObject(),
+      sectors: matchedSectors.map((sector) => ({
+        sectorId: sector.sectorId,
+        name: sector.name,
+        description: sector.description,
+        isActive: sector.isActive,
+        color: sector.color,
+        icon: sector.icon,
+      })),
+    };
+
+    res.status(200).json(response);
   } catch (error) {
     res.status(500).json({
       message: "Error fetching preferences",

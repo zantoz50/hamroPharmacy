@@ -46,7 +46,7 @@ const systemPreferenceSchema = new mongoose.Schema(
     loyaltyLedgers: [loyaltyLedgerSchema],
     sectors: [
       {
-        sectorId: { type: Number, required: true, unique: true },
+        sectorId: { type: Number, required: true },
         name: { type: String, required: true, trim: true },
         description: { type: String },
         isActive: { type: Boolean, default: true },
@@ -60,6 +60,11 @@ const systemPreferenceSchema = new mongoose.Schema(
         description: { type: String }, // optional notes
       },
     ],
+    subscriptionPlan: {
+      type: [String], // array of strings
+      required: true,
+      enum: ["restaurant", "cafeteria", "mart", "all"], // enforce allowed values
+    },
   },
   { timestamps: true },
 );

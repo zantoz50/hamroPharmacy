@@ -1,7 +1,9 @@
 // seedSectors.js
 const { default: mongoose } = require("mongoose");
 const { Sector } = require("../models/utilits.model");
-
+const path = require("path");
+const dotenv = require("dotenv");
+dotenv.config({ path: path.resolve(__dirname, "../../.env") });
 const DEFAULT_SECTORS = [
   {
     sectorId: 1,
@@ -60,6 +62,8 @@ async function seedDefaultSectors() {
 }
 
 // (async () => {
+//   console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
+
 //   try {
 //     const uri =
 //       process.env.MONGO_URI ||
@@ -79,5 +83,5 @@ async function seedDefaultSectors() {
 //     console.error("❌ Seeder failed:", err);
 //     process.exit(1);
 //   }
-//})();
+// })();
 module.exports = seedDefaultSectors;

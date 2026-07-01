@@ -52,7 +52,7 @@
 
 const path = require("path");
 const dotenv = require("dotenv");
-dotenv.config({ path: path.resolve(__dirname, "../env.example") });
+dotenv.config({ path: path.resolve(__dirname, "../.env") });
 
 const logger = require("./utils/logger");
 const connectDB = require("./config/db");

@@ -15,6 +15,7 @@ const connectDB = async () => {
     MONGO_URI && MONGO_URI.trim().length > 0
       ? MONGO_URI
       : `mongodb://${MONGO_HOST}:${MONGO_PORT}/${MONGO_DB}`;
+  console.log("Loaded MONGO_URI:", process.env.MONGO_URI);
 
   try {
     mongoose.set("strictQuery", true);

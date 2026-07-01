@@ -119,26 +119,26 @@ async function ensureTenantSectorPreferences(
   subscriptionPlan,
 ) {
   // ✅ Normalize subscriptionPlan into sector names
-  let sectorNames = [];
-  if (subscriptionPlan.includes("all")) {
-    sectorNames = ["Restaurant", "Cafeteria", "Mart"];
-  } else {
-    sectorNames = subscriptionPlan.map(
-      (p) => p.charAt(0).toUpperCase() + p.slice(1),
-    );
-  }
+  // let sectorNames = [];
+  // if (subscriptionPlan.includes("all")) {
+  //   sectorNames = ["Restaurant", "Cafeteria", "Mart"];
+  // } else {
+  //   sectorNames = subscriptionPlan.map(
+  //     (p) => p.charAt(0).toUpperCase() + p.slice(1),
+  //   );
+  // }
 
   // ✅ Fetch only the sectors relevant to the subscription
-  const globalSectors = await Sector.find({ name: { $in: sectorNames } });
+  // const globalSectors = await Sector.find({ name: { $in: sectorNames } });
 
-  const prefSectors = globalSectors.map((sector) => ({
-    sectorId: sector.sectorId,
-    name: sector.name,
-    description: sector.description,
-    isActive: sector.isActive,
-    color: sector.color,
-    icon: sector.icon,
-  }));
+  // const prefSectors = globalSectors.map((sector) => ({
+  //   sectorId: sector.sectorId,
+  //   name: sector.name,
+  //   description: sector.description,
+  //   isActive: sector.isActive,
+  //   color: sector.color,
+  //   icon: sector.icon,
+  // }));
 
   const existingPrefs = await SystemPreference.findOne({ tenantId });
 
@@ -156,15 +156,16 @@ async function ensureTenantSectorPreferences(
       activeOffers: [],
       promoCampaigns: [],
       loyaltyLedgers: [],
-      sectors: prefSectors,
+      subscriptionPlan: subscriptionPlan,
+      sectors: [],
       categories: [],
     });
     await prefs.save();
   } else {
-    await SystemPreference.updateOne(
-      { tenantId },
-      { $addToSet: { sectors: { $each: prefSectors } } },
-    );
+    // await SystemPreference.updateOne(
+    //   { tenantId },
+    //   { $addToSet: { sectors: { $each: prefSectors } } },
+    // );
   }
 }
 

@@ -61,7 +61,7 @@ exports.register = async (req, res, next) => {
       );
     } catch (err) {
       // rollback tenant if preference creation fails
-      await Tenant.deleteOne({ _id: tenant._id });
+      await Tenant.deleteOne({ tenantId: tenant.tenantId });
       return res
         .status(500)
         .json({ message: "Failed to create preferences", error: err.message });
@@ -91,7 +91,7 @@ exports.register = async (req, res, next) => {
       await user.save();
     } catch (err) {
       // rollback tenant + preference if user creation fails
-      await Tenant.deleteOne({ _id: tenant._id });
+      await Tenant.deleteOne({ tenantId: tenant.tenantId });
       await SystemPreference.deleteOne({ tenantId: tenant.tenantId });
       return res
         .status(500)
