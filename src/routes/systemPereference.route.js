@@ -168,7 +168,7 @@ router.get(
   controller.getCategories,
 );
 router.put(
-  "/categories/:category",
+  "/categories/:categoryId",
   requireAuth,
   tenantMiddleware,
   controller.updateCategory,

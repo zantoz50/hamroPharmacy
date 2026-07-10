@@ -1,36 +1,40 @@
 "use strict";
 
 const mongoose = require("mongoose");
+const Counter = require("./counter.model");
 
 // models/rawMaterial.model.js
 const RawMaterialSchema = new mongoose.Schema(
   {
+    rawMaterialId: {
+      type: Number,
+      unique: true,
+    },
     tenantId: {
       type: Number,
       required: true,
       index: true, // multi-tenant isolation
     },
-    ingredientName: {
+    name: {
       type: String,
       required: true,
       trim: true,
     },
-    targetSector: {
+    sectorId: {
+      type: Number,
+      required: true,
+    },
+    category: {
       type: String,
       required: true,
       trim: true,
     },
-    inventoryCategory: {
-      type: String,
-      required: true,
-      trim: true,
-    },
-    initialQuantity: {
+    quantity: {
       type: Number,
       required: true,
       min: 0,
     },
-    stockingUnit: {
+    unit: {
       type: String,
       required: true,
       trim: true,
@@ -40,7 +44,11 @@ const RawMaterialSchema = new mongoose.Schema(
       required: true,
       min: 0,
     },
-    lowAlertThreshold: {
+    sku: {
+      type: String,
+      default: "",
+    },
+    minQuantity: {
       type: Number,
       required: true,
       min: 0,
@@ -54,12 +62,24 @@ const RawMaterialSchema = new mongoose.Schema(
       type: String,
       trim: true,
     },
-    supplierContract: {
+    supplierContact: {
       type: String,
       trim: true,
     },
   },
   { timestamps: true },
 );
+// Auto-increment invoiceId
+RawMaterialSchema.pre("save", async function (next) {
+  if (this.isNew) {
+    const counter = await Counter.findByIdAndUpdate(
+      { _id: "rawMaterialId" },
+      { $inc: { seq: 1 } },
+      { new: true, upsert: true },
+    );
+    this.rawMaterialId = counter.seq;
+  }
+  next();
+});
 
 module.exports = mongoose.model("RawMaterial", RawMaterialSchema);

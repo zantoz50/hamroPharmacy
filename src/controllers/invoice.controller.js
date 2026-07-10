@@ -217,11 +217,14 @@ exports.updateMasterInvoice = async (req, res) => {
       tenantId: req.tenantId,
       eventType: "INVOICE_UPDATED",
       eventId: masterInvoice.masterInvoiceId.toString(),
-      sectorId: sectorId,
+      sectorId: 0,
       data: {
         paymentStatus,
         customerId: masterInvoice.customerId,
         customerName: masterInvoice.customerName,
+        totalPrice: masterInvoice.totalAmount,
+        deliveryType: masterInvoice.deliveryType,
+        tableNo: masterInvoice.tableNo,
       },
       message: `Invoice ${masterInvoice.masterInvoiceId} updated with status ${paymentStatus}`,
     });

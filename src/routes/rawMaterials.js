@@ -4,6 +4,8 @@ const express = require("express");
 const { check } = require("express-validator");
 const rawMaterialController = require("../controllers/rawMaterials.controller");
 const validateRequest = require("../middleware/validateRequest.middleware");
+const { requireAuth } = require("../middleware/auth.middleware");
+const tenantMiddleware = require("../middleware/tenant.middleware");
 
 const router = express.Router();
 
@@ -59,7 +61,12 @@ const router = express.Router();
  *       201:
  *         description: Raw material created successfully
  */
-router.post("/", rawMaterialController.createRawMaterial);
+router.post(
+  "/",
+  requireAuth,
+  tenantMiddleware,
+  rawMaterialController.createRawMaterial,
+);
 
 /**
  * @swagger
@@ -71,7 +78,12 @@ router.post("/", rawMaterialController.createRawMaterial);
  *       200:
  *         description: List of raw materials
  */
-router.get("/", rawMaterialController.getRawMaterials);
+router.get(
+  "/",
+  requireAuth,
+  tenantMiddleware,
+  rawMaterialController.getRawMaterials,
+);
 
 /**
  * @swagger
@@ -95,7 +107,12 @@ router.get("/", rawMaterialController.getRawMaterials);
  *       200:
  *         description: Raw material updated successfully
  */
-router.put("/:id", rawMaterialController.updateRawMaterial);
+router.put(
+  "/:id",
+  requireAuth,
+  tenantMiddleware,
+  rawMaterialController.updateRawMaterial,
+);
 
 /**
  * @swagger
@@ -113,7 +130,12 @@ router.put("/:id", rawMaterialController.updateRawMaterial);
  *       200:
  *         description: Raw material deleted successfully
  */
-router.delete("/:id", rawMaterialController.deleteRawMaterial);
+router.delete(
+  "/:id",
+  requireAuth,
+  tenantMiddleware,
+  rawMaterialController.deleteRawMaterial,
+);
 
 /**
  * @swagger
@@ -125,7 +147,7 @@ router.delete("/:id", rawMaterialController.deleteRawMaterial);
  *       200:
  *         description: Dashboard statistics
  */
-router.get("/stats", async (req, res) => {
+router.get("/stats", requireAuth, tenantMiddleware, async (req, res) => {
   try {
     const rawMaterials = await require("../models/rawMaterial.model").find({
       tenantId: req.tenantId,

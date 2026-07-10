@@ -29,20 +29,22 @@ exports.createOrder = async (req, res) => {
           .status(404)
           .json({ message: `Item ${item.inventoryId} not found` });
       }
-
-      if (inventoryItem.stock < item.quantity) {
+      //Count for the Stock -- Future
+      if (sectorId === 3 && inventoryItem.stock < item.quantity) {
         return res.status(400).json({
           message: `Insufficient stock for ${inventoryItem.name}`,
           available: inventoryItem.stock,
         });
       }
-
-      inventoryItem.stock -= item.quantity;
-      if (inventoryItem.stock <= inventoryItem.minStock) {
-        console.warn(
-          `⚠️ Stock warning: ${inventoryItem.name} is below minimum threshold`,
-        );
+      if (sectorId === 3) {
+        inventoryItem.stock -= item.quantity;
+        if (inventoryItem.stock <= inventoryItem.minStock) {
+          console.warn(
+            `⚠️ Stock warning: ${inventoryItem.name} is below minimum threshold`,
+          );
+        }
       }
+
       await inventoryItem.save();
     }
     // ✅ Call your external createMasterInvoice method
@@ -78,6 +80,9 @@ exports.createOrder = async (req, res) => {
       data: {
         customerId: newOrder.customerId,
         customerName: newOrder.customerName,
+        totalPrice: newOrder.totalPrice,
+        deliveryType: newOrder.deliveryType,
+        tableNo: newOrder.tableNo,
       },
       message: `Order ${newOrder.masterInvoiceId} created!`,
     });

@@ -2,25 +2,6 @@
 // controllers/systemPreference.controller.js
 const SystemPreference = require("../models/systemPreference.model");
 const { Sector, Category } = require("../models/utilits.model");
-// Get system preferences
-
-// ✅ Get system preferences for the tenant from middleware
-// exports.getPreferences = async (req, res) => {
-//   try {
-//     const tenantId = req.tenantId; // injected by tenantMiddleware
-//     if (!tenantId) {
-//       return res.status(400).json({ message: "Tenant ID missing" });
-//     }
-
-//     const prefs = await SystemPreference.findOne({ tenantId });
-//     res.status(200).json(prefs || {});
-//   } catch (error) {
-//     res.status(500).json({
-//       message: "Error fetching preferences",
-//       error: error.message,
-//     });
-//   }
-// };
 
 exports.getPreferences = async (req, res) => {
   try {
@@ -222,11 +203,11 @@ exports.getCategories = async (req, res) => {
 
 exports.updateCategory = async (req, res) => {
   try {
-    const { id } = req.params;
+    const { categoryId } = req.params;
     const updates = req.body;
 
     const item = await Category.findOneAndUpdate(
-      { categoryId: id, tenantId: req.tenantId },
+      { categoryId: categoryId, tenantId: req.tenantId },
       updates,
       { new: true },
     );
@@ -236,7 +217,6 @@ exports.updateCategory = async (req, res) => {
     }
     res.status(200).json({
       message: "Category updated successfully",
-      categories: prefs.categories,
     });
   } catch (error) {
     res
